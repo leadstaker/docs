@@ -1,19 +1,27 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Leadstaker",
   "colors": {
-    "primary": "#16A34A",
+    "primary": "#FC0168",
     "light": "#07C983",
     "dark": "#15803D"
   },
   "favicon": "/favicon.svg",
+  "fonts":{
+    "family": "Mozilla Text"
+  },
   "navigation": {
     "pages": ["index", "quickstart"],
     "global": {
       "anchors": [
         {
           "anchor": "Documentation",
+          "href": "https://mintlify.com/docs",
+          "icon": "book-open-cover"
+        },
+        {
+          "anchor": "API Reference",
           "href": "https://mintlify.com/docs",
           "icon": "book-open-cover"
         },
@@ -32,14 +40,18 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Home",
+        "href": "https://leadstaker.com"
+      },
+      {
+        "label": "Sign In",
+        "href": "https://app.leadstaker.com"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Get Started",
+      "href": "https://app.leadstaker.com"
     }
   },
   "contextual": {
@@ -57,7 +69,6 @@
   "footer": {
     "socials": {
       "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
       "linkedin": "https://linkedin.com/company/mintlify"
     }
   }
