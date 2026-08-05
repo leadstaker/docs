@@ -1,47 +1,76 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Primeiros passos"
+description: "Da chave de API ao primeiro contato criado, em cinco minutos."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+Este guia leva você de zero a um contato criado pela API, com o registro visível no dashboard.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+## Antes de começar
 
-## Prerequisites
+Você precisa de um projeto no Leadstaker e de acesso de membro a ele. Se ainda não tem, [crie sua conta](https://app.leadstaker.com).
 
-Before you begin, you must have:
+## 1. Gere uma chave de API
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+No dashboard, acesse as **configurações do projeto** e clique em **gerar token**.
 
-## Get started
+Guarde a chave assim que ela aparecer: ela não é mostrada de novo. Detalhes em [Autenticação](/api-reference/authentication).
 
-<Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+## 2. Confirme que a chave funciona
 
-    ```bash
-    npm install your-package
-    ```
-  </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+```bash
+curl https://n-api.leadstaker.com/v1/contacts \
+  -H "x-api-key: SUA_CHAVE"
+```
 
-    ```bash
-    your-cli init
-    ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+Uma resposta `200` com um envelope `{ "data": [...] }` significa que a chave está válida e já escopada no seu projeto. Um `401` significa chave errada ou vencida.
 
-    ```bash
-    your-cli start
-    ```
-  </Step>
-</Steps>
+## 3. Descubra os campos do projeto
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+Um contato no Leadstaker não tem colunas fixas: nome, telefone e o resto são **campos** configuráveis por projeto. Antes de criar alguém, veja quais existem:
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+```bash
+curl "https://n-api.leadstaker.com/v1/fields?entityTypes=CONTACT" \
+  -H "x-api-key: SUA_CHAVE"
+```
+
+Anote o `id` dos campos que você vai preencher.
+
+## 4. Crie um contato
+
+```bash
+curl -X POST https://n-api.leadstaker.com/v1/contacts \
+  -H "x-api-key: SUA_CHAVE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fields": [
+      { "fieldId": "ID_DO_CAMPO_NOME", "value": "Maria Andrade" },
+      { "fieldId": "ID_DO_CAMPO_TELEFONE", "value": "+5551999999999" }
+    ]
+  }'
+```
+
+<Note>
+  Esse endpoint faz upsert. Se já existir um contato equivalente, a resposta é `200` com o registro existente em vez de `201` com um novo. Use o status para saber o que aconteceu.
+</Note>
+
+## 5. Encontre o contato de volta
+
+```bash
+curl -G https://n-api.leadstaker.com/v1/contacts \
+  -H "x-api-key: SUA_CHAVE" \
+  --data-urlencode "search=Maria" \
+  --data-urlencode "[limit]=10"
+```
+
+A gramática completa de filtros, ordenação e paginação está em [Filtros, ordenação e paginação](/api-reference/listing).
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="Autenticação" icon="key" href="/api-reference/authentication">
+    Escopo da chave e expiração.
+  </Card>
+  <Card title="Erros" icon="triangle-exclamation" href="/api-reference/errors">
+    O formato de erro e o que cada código quer dizer.
+  </Card>
+</CardGroup>

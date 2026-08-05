@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "spec": "curl -fsS ${LEADSTAKER_API_URL:-http://localhost:3096}/openapi.json -o api-reference/openapi.json",
+    "dev": "npm run spec && mintlify dev"
+  },
+  "dependencies": {
+    "mintlify": "^4.2.585"
+  }
+}

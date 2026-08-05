@@ -1,0 +1,51 @@
+---
+title: "Erros"
+description: "O formato de erro da API e o que cada código significa."
+---
+
+Todo erro devolve o mesmo corpo, qualquer que seja o endpoint:
+
+```json
+{
+  "errorCode": "VALIDATION",
+  "message": "The request contains semantic errors or invalid data that prevents processing.",
+  "status": 422,
+  "errors": [
+    { "field": "name", "code": "TOO_SMALL", "message": "String must contain at least 1 character(s)" }
+  ]
+}
+```
+
+`errors` só aparece quando o erro é atribuível a campos específicos. Trate pelo `errorCode`, não pela `message`: a mensagem é para humanos e pode mudar.
+
+## Códigos
+
+| `errorCode` | Status | Quando acontece |
+| --- | --- | --- |
+| `MISSING_PARAM` | 400 | Falta um parâmetro obrigatório na rota ou na query |
+| `AUTHENTICATION` | 401 | Header `x-api-key` ausente, desconhecido ou vencido |
+| `INVALID_TOKEN` | 401 | Credencial malformada |
+| `EXPIRED_TOKEN` | 401 | Credencial expirada |
+| `INSUFFICIENT_FUNDS` | 402 | Créditos insuficientes para a operação |
+| `UNAUTHORIZED_ACCESS` | 403 | A credencial é válida, mas não alcança esse recurso |
+| `NOT_FOUND` | 404 | O recurso não existe, ou está fora do projeto da sua chave |
+| `DUPLICATE_CONFLICT` | 409 | Já existe um registro com esses dados |
+| `VALIDATION` | 422 | O corpo não passou na validação |
+| `TOO_MANY_REQUESTS` | 429 | Limite de requisições atingido |
+| `LOCK_TIMEOUT` | 429 | O recurso está travado por outra operação em andamento |
+| `EXTERNAL_PROVIDER` | 502 | Um provedor externo falhou (WhatsApp, pagamento, IA) |
+| `INTERNAL_SERVER` | 500 | Falha não prevista do nosso lado |
+
+## Detalhes que valem saber
+
+<AccordionGroup>
+  <Accordion title="404 e não 403 para recurso de outro projeto">
+    Pedir um registro que existe mas pertence a outro projeto devolve `404`, não `403`. É deliberado: um `403` confirmaria que o id existe. Na prática, trate `404` como "não existe para você".
+  </Accordion>
+  <Accordion title="TOO_MANY_REQUESTS traz o tempo de espera">
+    O array `errors` vem com um item de `field: "RETRY_AFTER"` indicando quanto esperar antes de tentar de novo.
+  </Accordion>
+  <Accordion title="LOCK_TIMEOUT costuma ser transitório">
+    Ele indica que outra operação está segurando o mesmo recurso. Uma nova tentativa depois de um intervalo curto geralmente passa. Vale tratar com backoff, diferente dos outros 4xx.
+  </Accordion>
+</AccordionGroup>

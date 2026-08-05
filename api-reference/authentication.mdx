@@ -1,0 +1,42 @@
+---
+title: "Autenticação"
+description: "Como autenticar suas chamadas na API do Leadstaker com uma chave de projeto."
+---
+
+Toda chamada à API pública é autenticada por uma **chave de API de projeto**, enviada no header `x-api-key`.
+
+```bash
+curl https://n-api.leadstaker.com/v1/contacts \
+  -H "x-api-key: SUA_CHAVE"
+```
+
+## A chave carrega o projeto
+
+Você não envia `projectId` em lugar nenhum. A chave já está amarrada a um projeto, e a API deriva o escopo dela: toda leitura e toda escrita acontecem dentro daquele projeto, sempre.
+
+Isso tem duas consequências práticas:
+
+<AccordionGroup>
+  <Accordion title="Uma chave por projeto">
+    Se você integra com mais de um projeto, precisa de uma chave para cada. Não existe chave que atravesse projetos.
+  </Accordion>
+  <Accordion title="Filtrar por projeto não faz nada">
+    Um filtro `projectId[eq]=...` na query é redundante e não amplia o acesso. O escopo da chave vence.
+  </Accordion>
+</AccordionGroup>
+
+## Criar uma chave
+
+Acesse as **configurações do projeto** no dashboard e clique em **gerar token**.
+
+<Warning>
+  A chave aparece uma única vez, no momento em que é gerada. A API guarda apenas um hash dela, então não há como recuperá-la depois. Se perder, gere outra.
+</Warning>
+
+Toda chave tem data de expiração. Uma chave vencida passa a responder `401`.
+
+## Ambientes
+
+| Ambiente | Base URL |
+| --- | --- |
+| Produção | `https://n-api.leadstaker.com` |

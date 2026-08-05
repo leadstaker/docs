@@ -1,75 +1,91 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Leadstaker",
-  "colors": {
-    "primary": "#FC0168",
-    "light": "#07C983",
-    "dark": "#15803D"
-  },
-  "favicon": "/favicon.svg",
-  "fonts":{
-    "family": "Mozilla Text"
-  },
-  "navigation": {
-    "pages": ["index", "quickstart"],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "API Reference",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+    "$schema": "https://mintlify.com/docs.json",
+    "theme": "mint",
+    "name": "Leadstaker",
+    "colors": {
+        "primary": "#FC0168",
+        "light": "#FC0168",
+        "dark": "#FC0168"
+    },
+    "favicon": "/favicon.svg",
+    "fonts": {
+        "family": "Mozilla Text"
+    },
+    "navigation": {
+        "tabs": [
+            {
+                "tab": "Documentation",
+                "pages": [
+                    "index",
+                    "quickstart"
+                ]
+            },
+            {
+                "tab": "API Reference",
+                "icon": "brackets-curly",
+                "groups": [
+                    {
+                        "group": "Começar",
+                        "pages": [
+                            "api-reference/authentication",
+                            "api-reference/listing",
+                            "api-reference/errors"
+                        ]
+                    },
+                    {
+                        "group": "Endpoints",
+                        "openapi": "api-reference/openapi.json"
+                    }
+                ]
+            }
+        ],
+        "global": {
+            "anchors": [
+                {
+                    "anchor": "Documentation",
+                    "href": "/",
+                    "icon": "book-open-cover"
+                }
+            ]
         }
-      ]
+    },
+    "logo": {
+        "light": "/logo/light.svg",
+        "dark": "/logo/dark.svg"
+    },
+    "navbar": {
+        "links": [
+            {
+                "label": "Home",
+                "href": "https://leadstaker.com"
+            },
+            {
+                "label": "Sign In",
+                "href": "https://app.leadstaker.com"
+            }
+        ],
+        "primary": {
+            "type": "button",
+            "label": "Get Started",
+            "href": "https://app.leadstaker.com"
+        }
+    },
+    "contextual": {
+        "options": [
+            "copy",
+            "view",
+            "chatgpt",
+            "claude",
+            "perplexity",
+            "mcp",
+            "cursor",
+            "vscode"
+        ]
+    },
+    "footer": {
+        "socials": {
+            "instagram": "https://www.instagram.com/leadstaker/",
+            "website": "https://leadstaker.com"
+        }
     }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Home",
-        "href": "https://leadstaker.com"
-      },
-      {
-        "label": "Sign In",
-        "href": "https://app.leadstaker.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Get Started",
-      "href": "https://app.leadstaker.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
-  }
 }

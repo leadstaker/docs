@@ -1,0 +1,87 @@
+---
+title: "Filtros, ordenação e paginação"
+description: "Como montar a query string dos endpoints de listagem."
+---
+
+Os endpoints de listagem aceitam filtros, ordenação, paginação e projeção pela query string. A convenção é a mesma em todos eles: **chaves reservadas entre colchetes**, e **operadores como sufixo do campo**.
+
+## Operadores
+
+O formato é `campo[operador]=valor`.
+
+```bash
+# deals do pipeline X, criados a partir de 1 de janeiro, do mais novo para o mais antigo
+curl -G https://n-api.leadstaker.com/v1/deals \
+  -H "x-api-key: SUA_CHAVE" \
+  --data-urlencode "pipelineId[eq]=6707c3f1e2a4b8001f2d9c11" \
+  --data-urlencode "createdAt[gte]=2026-01-01" \
+  --data-urlencode "createdAt[sort]=desc"
+```
+
+| Operador | Efeito | Exemplo |
+| --- | --- | --- |
+| `eq` | Igual | `status[eq]=OPEN` |
+| `ne` | Diferente | `status[ne]=CLOSED` |
+| `gt` `gte` `lt` `lte` | Comparação; aceita número ou data | `createdAt[gte]=2026-01-01` |
+| `in` | Está na lista, separada por vírgula | `stageId[in]=abc,def` |
+| `nin` | Não está na lista | `stageId[nin]=abc,def` |
+| `exists` | Campo presente ou ausente | `closedAt[exists]=true` |
+| `regex` | Contém, sem diferenciar maiúsculas | `name[regex]=maria` |
+| `sort` | Ordena por esse campo | `createdAt[sort]=desc` |
+
+Escrever `campo=valor` sem colchetes equivale a `campo[eq]=valor`.
+
+<Tip>
+  `sort` aceita `asc`, `desc`, `1` e `-1`. Qualquer outro valor cai em `asc`. Você pode ordenar por mais de um campo: a ordem em que aparecem na query é a ordem de precedência.
+</Tip>
+
+### Datas e números
+
+`gt`, `gte`, `lt` e `lte` tentam interpretar o valor como data primeiro, e só depois como número. Uma string que o JavaScript entende como data vira data, então prefira ISO 8601 para não haver ambiguidade.
+
+## Chaves reservadas
+
+| Chave | Efeito | Padrão |
+| --- | --- | --- |
+| `[limit]` | Quantos registros retornar, máximo 100 | definido pelo endpoint |
+| `[offset]` | Quantos registros pular | `0` |
+| `[project]` | Campos a retornar, separados por vírgula | todos |
+| `[with]` | Relações a popular, separadas por vírgula | nenhuma |
+| `[logic]` | `AND` ou `OR` entre os filtros | `AND` |
+
+```bash
+# só id e nome, 20 por página, segunda página
+curl -G https://n-api.leadstaker.com/v1/pipelines \
+  -H "x-api-key: SUA_CHAVE" \
+  --data-urlencode "[project]=id,name" \
+  --data-urlencode "[limit]=20" \
+  --data-urlencode "[offset]=20"
+```
+
+<Warning>
+  `[limit]` é limitado a 100. Um valor maior é reduzido para 100 em silêncio, sem erro. Valores abaixo de 1 viram 1.
+</Warning>
+
+Chaves entre colchetes que a API não reconhece são ignoradas, não rejeitadas. Um `[limit]` escrito errado não gera erro: você recebe o padrão.
+
+## O envelope da resposta
+
+A maioria das listagens devolve um envelope paginado:
+
+```json
+{
+  "data": [],
+  "hasMore": true,
+  "limit": 50,
+  "offset": 0,
+  "total": 214
+}
+```
+
+Nem todas. Vale conferir a resposta do endpoint na referência antes de assumir:
+
+| Formato | Endpoints |
+| --- | --- |
+| Envelope paginado | contacts, deals, chats, messages, fields, field groups, pipelines |
+| `{ "data": [] }` | tags, loss reasons |
+| Array puro | stages, notes |
