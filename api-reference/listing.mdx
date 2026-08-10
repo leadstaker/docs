@@ -43,7 +43,7 @@ Escrever `campo=valor` sem colchetes equivale a `campo[eq]=valor`.
 
 | Chave | Efeito | Padrão |
 | --- | --- | --- |
-| `[limit]` | Quantos registros retornar, máximo 100 | definido pelo endpoint |
+| `[limit]` | Quantos registros retornar, máximo 250 | definido pelo endpoint |
 | `[offset]` | Quantos registros pular | `0` |
 | `[project]` | Campos a retornar, separados por vírgula | todos |
 | `[with]` | Relações a popular, separadas por vírgula | nenhuma |
@@ -59,7 +59,7 @@ curl -G https://n-api.leadstaker.com/v1/pipelines \
 ```
 
 <Warning>
-  `[limit]` é limitado a 100. Um valor maior é reduzido para 100 em silêncio, sem erro. Valores abaixo de 1 viram 1.
+  `[limit]` é limitado a 250. Um valor maior é reduzido para 250 em silêncio, sem erro. Valores abaixo de 1 viram 1.
 </Warning>
 
 Chaves entre colchetes que a API não reconhece são ignoradas, não rejeitadas. Um `[limit]` escrito errado não gera erro: você recebe o padrão.
