@@ -13,6 +13,10 @@
   ],
   "tags": [
     {
+      "name": "Calls",
+      "description": "Phone calls made through the telephony app, with their recording, transcript and AI summary."
+    },
+    {
       "name": "Chats",
       "description": "Conversations with a contact over a connected channel."
     },
@@ -66,6 +70,890 @@
     }
   ],
   "paths": {
+    "/v1/deals/{dealId}/calls": {
+      "get": {
+        "tags": [
+          "Calls"
+        ],
+        "summary": "List the calls of a deal",
+        "operationId": "getDealsByDealIdCalls",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dealId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "[limit]",
+            "in": "query",
+            "required": false,
+            "description": "How many calls to return, at most 50. Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "[offset]",
+            "in": "query",
+            "required": false,
+            "description": "How many calls to skip.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "projectId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "entityId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The deal the call is attached to, or the contact when it has no deal."
+                      },
+                      "entityType": {
+                        "type": "string",
+                        "enum": [
+                          "DEAL",
+                          "CONTACT"
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "enum": [
+                          "API4COM"
+                        ]
+                      },
+                      "externalId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The call id on the telephony provider."
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "OUTBOUND",
+                          "INBOUND"
+                        ]
+                      },
+                      "from": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "EXTENSION"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The extension on the telephony provider, e.g. `1000`."
+                              },
+                              "userId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "PHONE"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Digits with the country code, e.g. `5548999998888`."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "to": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "EXTENSION"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The extension on the telephony provider, e.g. `1000`."
+                              },
+                              "userId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "PHONE"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Digits with the country code, e.g. `5548999998888`."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "answeredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "endedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "durationInSeconds": {
+                        "type": "integer",
+                        "description": "Talk time, from the answer to the hang up."
+                      },
+                      "outcome": {
+                        "type": "string",
+                        "enum": [
+                          "ANSWERED",
+                          "NO_ANSWER",
+                          "BUSY",
+                          "VOICEMAIL",
+                          "FAILED"
+                        ]
+                      },
+                      "recording": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "STORED",
+                              "UNAVAILABLE",
+                              "FAILED"
+                            ],
+                            "description": "`PENDING` while the recording is copied from the provider; only a `STORED` one can be played or transcribed."
+                          },
+                          "mimeType": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "transcription": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "AVAILABLE",
+                              "TOO_LONG",
+                              "PENDING",
+                              "DONE",
+                              "FAILED"
+                            ],
+                            "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                          },
+                          "turns": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "speaker": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SELLER",
+                                    "CUSTOMER"
+                                  ],
+                                  "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                },
+                                "start": {
+                                  "type": "number",
+                                  "description": "Seconds from the start of the recording."
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "speaker",
+                                "start",
+                                "text"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Null while there is no stored recording."
+                      },
+                      "analysis": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "DONE",
+                              "FAILED"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string",
+                            "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "The AI summary, written after each transcription; null before the first one."
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "projectId",
+                      "entityId",
+                      "entityType",
+                      "provider",
+                      "externalId",
+                      "direction",
+                      "from",
+                      "to",
+                      "startedAt",
+                      "endedAt",
+                      "durationInSeconds",
+                      "outcome",
+                      "recording",
+                      "transcription",
+                      "analysis",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6abd10c5812811e995a28f1f",
+                    "projectId": "665f1c2e8a94b70012d4e9a1",
+                    "entityId": "6715be3a9c40aa0013d8e5c2",
+                    "entityType": "DEAL",
+                    "provider": "API4COM",
+                    "externalId": "1759236412.4821",
+                    "direction": "OUTBOUND",
+                    "from": {
+                      "type": "EXTENSION",
+                      "number": "1000",
+                      "userId": "664d9e0b7c83aa0010f1c2d3"
+                    },
+                    "to": {
+                      "type": "PHONE",
+                      "number": "5548999998888"
+                    },
+                    "startedAt": "2026-09-30T13:40:02.000Z",
+                    "answeredAt": "2026-09-30T13:40:11.000Z",
+                    "endedAt": "2026-09-30T13:42:34.000Z",
+                    "durationInSeconds": 143,
+                    "outcome": "ANSWERED",
+                    "recording": {
+                      "status": "STORED",
+                      "mimeType": "audio/mpeg"
+                    },
+                    "transcription": {
+                      "status": "DONE",
+                      "text": "Oi João, tudo bem? Vi que a proposta de 10 mil ficou com você.\nTudo, gostei dos 10 mil. Me retorna amanhã?",
+                      "turns": [
+                        {
+                          "speaker": "SELLER",
+                          "start": 1.4,
+                          "text": "Oi João, tudo bem? Vi que a proposta de 10 mil ficou com você."
+                        },
+                        {
+                          "speaker": "CUSTOMER",
+                          "start": 9.2,
+                          "text": "Tudo, gostei dos 10 mil. Me retorna amanhã?"
+                        }
+                      ]
+                    },
+                    "analysis": {
+                      "status": "DONE",
+                      "summary": "João aceitou a proposta de R$ 10 mil e pediu retorno amanhã para fechar."
+                    },
+                    "createdAt": "2026-09-30T13:42:40.000Z",
+                    "updatedAt": "2026-09-30T13:43:15.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Answers with a bare array of calls, newest first, without an envelope or pagination fields. A call is stored once it ends, with its recording copied a few seconds later. Answered calls up to one hour are transcribed on their own; each transcription is followed by an AI summary in `analysis`. That analysis also writes what the call said into the fields of the deal and the contact, filled ones included, so a call can raise the same update events and webhooks as any other edit. Only the calls attached to this deal come back."
+      }
+    },
+    "/v1/contacts/{contactId}/calls": {
+      "get": {
+        "tags": [
+          "Calls"
+        ],
+        "summary": "List the calls of a contact",
+        "operationId": "getContactsByContactIdCalls",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "[limit]",
+            "in": "query",
+            "required": false,
+            "description": "How many calls to return, at most 50. Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "[offset]",
+            "in": "query",
+            "required": false,
+            "description": "How many calls to skip.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "projectId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "entityId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The deal the call is attached to, or the contact when it has no deal."
+                      },
+                      "entityType": {
+                        "type": "string",
+                        "enum": [
+                          "DEAL",
+                          "CONTACT"
+                        ]
+                      },
+                      "provider": {
+                        "type": "string",
+                        "enum": [
+                          "API4COM"
+                        ]
+                      },
+                      "externalId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The call id on the telephony provider."
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "OUTBOUND",
+                          "INBOUND"
+                        ]
+                      },
+                      "from": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "EXTENSION"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The extension on the telephony provider, e.g. `1000`."
+                              },
+                              "userId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "PHONE"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Digits with the country code, e.g. `5548999998888`."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "to": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "EXTENSION"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The extension on the telephony provider, e.g. `1000`."
+                              },
+                              "userId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "PHONE"
+                                ]
+                              },
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Digits with the country code, e.g. `5548999998888`."
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "number"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "answeredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "endedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "durationInSeconds": {
+                        "type": "integer",
+                        "description": "Talk time, from the answer to the hang up."
+                      },
+                      "outcome": {
+                        "type": "string",
+                        "enum": [
+                          "ANSWERED",
+                          "NO_ANSWER",
+                          "BUSY",
+                          "VOICEMAIL",
+                          "FAILED"
+                        ]
+                      },
+                      "recording": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "STORED",
+                              "UNAVAILABLE",
+                              "FAILED"
+                            ],
+                            "description": "`PENDING` while the recording is copied from the provider; only a `STORED` one can be played or transcribed."
+                          },
+                          "mimeType": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "transcription": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "AVAILABLE",
+                              "TOO_LONG",
+                              "PENDING",
+                              "DONE",
+                              "FAILED"
+                            ],
+                            "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                          },
+                          "turns": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "speaker": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SELLER",
+                                    "CUSTOMER"
+                                  ],
+                                  "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                },
+                                "start": {
+                                  "type": "number",
+                                  "description": "Seconds from the start of the recording."
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "speaker",
+                                "start",
+                                "text"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Null while there is no stored recording."
+                      },
+                      "analysis": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "DONE",
+                              "FAILED"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string",
+                            "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                          }
+                        },
+                        "required": [
+                          "status"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "The AI summary, written after each transcription; null before the first one."
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "projectId",
+                      "entityId",
+                      "entityType",
+                      "provider",
+                      "externalId",
+                      "direction",
+                      "from",
+                      "to",
+                      "startedAt",
+                      "endedAt",
+                      "durationInSeconds",
+                      "outcome",
+                      "recording",
+                      "transcription",
+                      "analysis",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6abd10c5812811e995a28f1f",
+                    "projectId": "665f1c2e8a94b70012d4e9a1",
+                    "entityId": "6715be3a9c40aa0013d8e5c2",
+                    "entityType": "DEAL",
+                    "provider": "API4COM",
+                    "externalId": "1759236412.4821",
+                    "direction": "OUTBOUND",
+                    "from": {
+                      "type": "EXTENSION",
+                      "number": "1000",
+                      "userId": "664d9e0b7c83aa0010f1c2d3"
+                    },
+                    "to": {
+                      "type": "PHONE",
+                      "number": "5548999998888"
+                    },
+                    "startedAt": "2026-09-30T13:40:02.000Z",
+                    "answeredAt": "2026-09-30T13:40:11.000Z",
+                    "endedAt": "2026-09-30T13:42:34.000Z",
+                    "durationInSeconds": 143,
+                    "outcome": "ANSWERED",
+                    "recording": {
+                      "status": "STORED",
+                      "mimeType": "audio/mpeg"
+                    },
+                    "transcription": {
+                      "status": "DONE",
+                      "text": "Oi João, tudo bem? Vi que a proposta de 10 mil ficou com você.\nTudo, gostei dos 10 mil. Me retorna amanhã?",
+                      "turns": [
+                        {
+                          "speaker": "SELLER",
+                          "start": 1.4,
+                          "text": "Oi João, tudo bem? Vi que a proposta de 10 mil ficou com você."
+                        },
+                        {
+                          "speaker": "CUSTOMER",
+                          "start": 9.2,
+                          "text": "Tudo, gostei dos 10 mil. Me retorna amanhã?"
+                        }
+                      ]
+                    },
+                    "analysis": {
+                      "status": "DONE",
+                      "summary": "João aceitou a proposta de R$ 10 mil e pediu retorno amanhã para fechar."
+                    },
+                    "createdAt": "2026-09-30T13:42:40.000Z",
+                    "updatedAt": "2026-09-30T13:43:15.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Answers with a bare array of calls, newest first, without an envelope or pagination fields. A call is stored once it ends, with its recording copied a few seconds later. Answered calls up to one hour are transcribed on their own; each transcription is followed by an AI summary in `analysis`. That analysis also writes what the call said into the fields of the deal and the contact, filled ones included, so a call can raise the same update events and webhooks as any other edit. Includes the calls attached to the contact and to the deals of the contact the caller can see."
+      }
+    },
     "/v1/chats": {
       "get": {
         "tags": [
@@ -244,6 +1132,12 @@
                           "updatedAt": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "channelName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "nullable": true,
+                            "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                           }
                         },
                         "required": [
@@ -296,6 +1190,7 @@
                       "profile": {
                         "name": "Maria Andrade"
                       },
+                      "channelName": "Maria",
                       "status": "OPEN",
                       "agent": {
                         "id": "66f5a1d28e94bb0012c3d4e5",
@@ -469,6 +1364,12 @@
                     "updatedAt": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "channelName": {
+                      "type": "string",
+                      "minLength": 1,
+                      "nullable": true,
+                      "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                     }
                   },
                   "required": [
@@ -496,6 +1397,7 @@
                   "profile": {
                     "name": "Maria Andrade"
                   },
+                  "channelName": "Maria",
                   "status": "OPEN",
                   "agent": {
                     "id": "66f5a1d28e94bb0012c3d4e5",
@@ -637,7 +1539,7 @@
         "tags": [
           "Chats"
         ],
-        "summary": "Turn the AI agent on or off for a chat",
+        "summary": "Turn the AI agent on or off for a chat, or switch it",
         "operationId": "patchChatsByIdAgent",
         "security": [
           {
@@ -690,7 +1592,7 @@
             }
           }
         },
-        "description": "Sets the AI agent of the chat to ACTIVE or DISABLED. Answers 204 with no body.",
+        "description": "Sets the AI agent of the chat to ACTIVE or DISABLED. With `agentId`, switches the chat to that agent of the project (404 when there is none, or it is archived; 422 TEST_CHAT on a test chat): it takes the `status` given, else the one the chat had, else ACTIVE, and what the previous agent had queued for the chat (follow-ups, a reply being sent) is dropped. The agent the chat already has only changes the status. Answers 204 with no body.",
         "requestBody": {
           "required": true,
           "content": {
@@ -703,12 +1605,15 @@
                     "enum": [
                       "ACTIVE",
                       "DISABLED"
-                    ]
+                    ],
+                    "description": "ACTIVE or DISABLED. Required without `agentId`; with it, the chat keeps its status when absent (ACTIVE for a chat that had no agent)."
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Switches the chat to this agent of the project. The chat's current agent only changes the status."
                   }
                 },
-                "required": [
-                  "status"
-                ],
                 "additionalProperties": false
               }
             }
@@ -1120,12 +2025,15 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "value": {}
+                        "value": {
+                          "description": "The value in the shape of the field's type. TEXT, PHONE, EMAIL, CPF, CNPJ, CPF_CNPJ, CEP, LINK and OPTIONS: a string (OPTIONS: one of its options). NUMBER: a number. CURRENCY: an amount in reais, as a number or a decimal string (`1500.5`, `\"1.500,50\"`), rounded to the cent. It is stored and read back in cents (`150050`). BOOLEAN: `true` or `false`. MULTISELECT: an array of its options. DATE and DATETIME: `YYYY-MM-DD`, an ISO 8601 datetime (UTC when it has no offset) or epoch milliseconds, stored as a date. TIME: `HH:mm`. `null` clears the field. A value that does not fit its field, or a `fieldId` this kind of record does not have, answers 422 naming the field."
+                        }
                       },
                       "required": [
                         "fieldId"
                       ],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Custom field value for this entity"
                     }
                   }
                 },
@@ -1341,12 +2249,15 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "value": {}
+                        "value": {
+                          "description": "The value in the shape of the field's type. TEXT, PHONE, EMAIL, CPF, CNPJ, CPF_CNPJ, CEP, LINK and OPTIONS: a string (OPTIONS: one of its options). NUMBER: a number. CURRENCY: an amount in reais, as a number or a decimal string (`1500.5`, `\"1.500,50\"`), rounded to the cent. It is stored and read back in cents (`150050`). BOOLEAN: `true` or `false`. MULTISELECT: an array of its options. DATE and DATETIME: `YYYY-MM-DD`, an ISO 8601 datetime (UTC when it has no offset) or epoch milliseconds, stored as a date. TIME: `HH:mm`. `null` clears the field. A value that does not fit its field, or a `fieldId` this kind of record does not have, answers 422 naming the field."
+                        }
                       },
                       "required": [
                         "fieldId"
                       ],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Custom field value for this entity"
                     }
                   }
                 },
@@ -2016,7 +2927,9 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "value": {}
+                        "value": {
+                          "description": "The value in the shape of the field's type. TEXT, PHONE, EMAIL, CPF, CNPJ, CPF_CNPJ, CEP, LINK and OPTIONS: a string (OPTIONS: one of its options). NUMBER: a number. CURRENCY: an amount in reais, as a number or a decimal string (`1500.5`, `\"1.500,50\"`), rounded to the cent. It is stored and read back in cents (`150050`). BOOLEAN: `true` or `false`. MULTISELECT: an array of its options. DATE and DATETIME: `YYYY-MM-DD`, an ISO 8601 datetime (UTC when it has no offset) or epoch milliseconds, stored as a date. TIME: `HH:mm`. `null` clears the field. A value that does not fit its field, or a `fieldId` this kind of record does not have, answers 422 naming the field."
+                        }
                       },
                       "required": [
                         "fieldId"
@@ -2405,7 +3318,9 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "value": {}
+                        "value": {
+                          "description": "The value in the shape of the field's type. TEXT, PHONE, EMAIL, CPF, CNPJ, CPF_CNPJ, CEP, LINK and OPTIONS: a string (OPTIONS: one of its options). NUMBER: a number. CURRENCY: an amount in reais, as a number or a decimal string (`1500.5`, `\"1.500,50\"`), rounded to the cent. It is stored and read back in cents (`150050`). BOOLEAN: `true` or `false`. MULTISELECT: an array of its options. DATE and DATETIME: `YYYY-MM-DD`, an ISO 8601 datetime (UTC when it has no offset) or epoch milliseconds, stored as a date. TIME: `HH:mm`. `null` clears the field. A value that does not fit its field, or a `fieldId` this kind of record does not have, answers 422 naming the field."
+                        }
                       },
                       "required": [
                         "fieldId"
@@ -3458,6 +4373,89 @@
                               "type": {
                                 "type": "string",
                                 "enum": [
+                                  "DATETIME"
+                                ]
+                              },
+                              "config": {
+                                "type": "object",
+                                "properties": {},
+                                "additionalProperties": false,
+                                "default": {}
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "level": {
+                                "type": "string",
+                                "enum": [
+                                  "USER",
+                                  "API"
+                                ]
+                              },
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "NAME",
+                                  "PHONE",
+                                  "EMAIL",
+                                  "PRICE",
+                                  "ACQUISITION_SOURCE",
+                                  "ORIGIN_URL",
+                                  "LEAD_ID",
+                                  "WHATSAPP_LID",
+                                  "CUSTOM_ID"
+                                ]
+                              },
+                              "projectId": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "archivedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            },
+                            "required": [
+                              "entityType",
+                              "label",
+                              "id",
+                              "type",
+                              "level"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "entityType": {
+                                "type": "string",
+                                "enum": [
+                                  "DEAL",
+                                  "CONTACT"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "fieldGroupId": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
                                   "BOOLEAN"
                                 ]
                               },
@@ -4252,10 +5250,104 @@
                                     ]
                                   },
                                   "min": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "description": "Lowest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                                   },
                                   "max": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "description": "Highest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "default": {}
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "level": {
+                                "type": "string",
+                                "enum": [
+                                  "USER",
+                                  "API"
+                                ]
+                              },
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "NAME",
+                                  "PHONE",
+                                  "EMAIL",
+                                  "PRICE",
+                                  "ACQUISITION_SOURCE",
+                                  "ORIGIN_URL",
+                                  "LEAD_ID",
+                                  "WHATSAPP_LID",
+                                  "CUSTOM_ID"
+                                ]
+                              },
+                              "projectId": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "archivedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            },
+                            "required": [
+                              "entityType",
+                              "label",
+                              "id",
+                              "type",
+                              "level"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "entityType": {
+                                "type": "string",
+                                "enum": [
+                                  "DEAL",
+                                  "CONTACT"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "fieldGroupId": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "TIME"
+                                ]
+                              },
+                              "config": {
+                                "type": "object",
+                                "properties": {
+                                  "min": {
+                                    "type": "string",
+                                    "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
+                                  },
+                                  "max": {
+                                    "type": "string",
+                                    "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
                                   }
                                 },
                                 "additionalProperties": false,
@@ -4673,6 +5765,89 @@
                           "type": "string",
                           "enum": [
                             "DATE"
+                          ]
+                        },
+                        "config": {
+                          "type": "object",
+                          "properties": {},
+                          "additionalProperties": false,
+                          "default": {}
+                        },
+                        "position": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "level": {
+                          "type": "string",
+                          "enum": [
+                            "USER",
+                            "API"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "NAME",
+                            "PHONE",
+                            "EMAIL",
+                            "PRICE",
+                            "ACQUISITION_SOURCE",
+                            "ORIGIN_URL",
+                            "LEAD_ID",
+                            "WHATSAPP_LID",
+                            "CUSTOM_ID"
+                          ]
+                        },
+                        "projectId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "archivedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "entityType",
+                        "label",
+                        "id",
+                        "type",
+                        "level"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "DEAL",
+                            "CONTACT"
+                          ]
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "fieldGroupId": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "DATETIME"
                           ]
                         },
                         "config": {
@@ -5549,10 +6724,104 @@
                               ]
                             },
                             "min": {
-                              "type": "number"
+                              "type": "number",
+                              "description": "Lowest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                             },
                             "max": {
-                              "type": "number"
+                              "type": "number",
+                              "description": "Highest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
+                            }
+                          },
+                          "additionalProperties": false,
+                          "default": {}
+                        },
+                        "position": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "level": {
+                          "type": "string",
+                          "enum": [
+                            "USER",
+                            "API"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "NAME",
+                            "PHONE",
+                            "EMAIL",
+                            "PRICE",
+                            "ACQUISITION_SOURCE",
+                            "ORIGIN_URL",
+                            "LEAD_ID",
+                            "WHATSAPP_LID",
+                            "CUSTOM_ID"
+                          ]
+                        },
+                        "projectId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "archivedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "entityType",
+                        "label",
+                        "id",
+                        "type",
+                        "level"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "DEAL",
+                            "CONTACT"
+                          ]
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "fieldGroupId": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "TIME"
+                          ]
+                        },
+                        "config": {
+                          "type": "object",
+                          "properties": {
+                            "min": {
+                              "type": "string",
+                              "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
+                            },
+                            "max": {
+                              "type": "string",
+                              "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
                             }
                           },
                           "additionalProperties": false,
@@ -6435,10 +7704,12 @@
                             ]
                           },
                           "min": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Lowest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                           },
                           "max": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Highest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                           }
                         },
                         "additionalProperties": false,
@@ -6803,6 +8074,89 @@
                           "type": "string",
                           "enum": [
                             "DATE"
+                          ]
+                        },
+                        "config": {
+                          "type": "object",
+                          "properties": {},
+                          "additionalProperties": false,
+                          "default": {}
+                        },
+                        "position": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "level": {
+                          "type": "string",
+                          "enum": [
+                            "USER",
+                            "API"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "NAME",
+                            "PHONE",
+                            "EMAIL",
+                            "PRICE",
+                            "ACQUISITION_SOURCE",
+                            "ORIGIN_URL",
+                            "LEAD_ID",
+                            "WHATSAPP_LID",
+                            "CUSTOM_ID"
+                          ]
+                        },
+                        "projectId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "archivedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "entityType",
+                        "label",
+                        "id",
+                        "type",
+                        "level"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "DEAL",
+                            "CONTACT"
+                          ]
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "fieldGroupId": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "DATETIME"
                           ]
                         },
                         "config": {
@@ -7679,10 +9033,104 @@
                               ]
                             },
                             "min": {
-                              "type": "number"
+                              "type": "number",
+                              "description": "Lowest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                             },
                             "max": {
-                              "type": "number"
+                              "type": "number",
+                              "description": "Highest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
+                            }
+                          },
+                          "additionalProperties": false,
+                          "default": {}
+                        },
+                        "position": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "level": {
+                          "type": "string",
+                          "enum": [
+                            "USER",
+                            "API"
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "NAME",
+                            "PHONE",
+                            "EMAIL",
+                            "PRICE",
+                            "ACQUISITION_SOURCE",
+                            "ORIGIN_URL",
+                            "LEAD_ID",
+                            "WHATSAPP_LID",
+                            "CUSTOM_ID"
+                          ]
+                        },
+                        "projectId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "archivedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "entityType",
+                        "label",
+                        "id",
+                        "type",
+                        "level"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "DEAL",
+                            "CONTACT"
+                          ]
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "fieldGroupId": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "TIME"
+                          ]
+                        },
+                        "config": {
+                          "type": "object",
+                          "properties": {
+                            "min": {
+                              "type": "string",
+                              "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
+                            },
+                            "max": {
+                              "type": "string",
+                              "pattern": "^([01]\\d|2[0-3]):([0-5]\\d)$"
                             }
                           },
                           "additionalProperties": false,
@@ -8509,10 +9957,12 @@
                             ]
                           },
                           "min": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Lowest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                           },
                           "max": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Highest amount accepted, in cents like the stored value (10000 is R$ 100,00)."
                           }
                         },
                         "additionalProperties": false,
@@ -9507,7 +10957,7 @@
             }
           }
         },
-        "description": "The loss reason is deleted. Answers 204 with no body."
+        "description": "The loss reason is deleted at once and the call answers 204 with no body. The deals marked with it have it cleared in the background, each one reported as a deal update, so a deal read right after may still carry it for a moment."
       }
     },
     "/v1/chats/{chatId}/messages": {
@@ -9628,6 +11078,25 @@
                               "name": {
                                 "type": "string",
                                 "minLength": 1
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "On a SYSTEM sender: the workflow run that sent it, when an automation did."
                               }
                             },
                             "required": [
@@ -10177,6 +11646,25 @@
                                 "additionalProperties": false
                               }
                             ]
+                          },
+                          "error": {
+                            "type": "string",
+                            "description": "A FAILED message's error, as the provider or the API gave it."
+                          },
+                          "errorCode": {
+                            "type": "string",
+                            "description": "A FAILED message's code: the provider's (Meta's error number, as text) when it gave one, else the API's (e.g. CONTACT_UNREACHABLE_BY_PROVIDER, TEMPLATE_NOT_FOUND)."
+                          },
+                          "errorCategory": {
+                            "type": "string",
+                            "enum": [
+                              "TEMPLATE",
+                              "OUTSIDE_WINDOW",
+                              "RECIPIENT",
+                              "CHANNEL",
+                              "OTHER"
+                            ],
+                            "description": "What a FAILED message's failure was about: TEMPLATE (the template was refused, paused or not approved), OUTSIDE_WINDOW (sent outside the 24 h window, where only a template goes), RECIPIENT (the number cannot receive it), CHANNEL (the channel cannot send: disconnected, blocked, unpaid) or OTHER."
                           }
                         },
                         "required": [
@@ -10935,6 +12423,25 @@
                         "name": {
                           "type": "string",
                           "minLength": 1
+                        },
+                        "automation": {
+                          "type": "object",
+                          "properties": {
+                            "workflowId": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "executionId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "workflowId",
+                            "executionId"
+                          ],
+                          "additionalProperties": false,
+                          "description": "On a SYSTEM sender: the workflow run that sent it, when an automation did."
                         }
                       },
                       "required": [
@@ -11484,6 +12991,25 @@
                           "additionalProperties": false
                         }
                       ]
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "A FAILED message's error, as the provider or the API gave it."
+                    },
+                    "errorCode": {
+                      "type": "string",
+                      "description": "A FAILED message's code: the provider's (Meta's error number, as text) when it gave one, else the API's (e.g. CONTACT_UNREACHABLE_BY_PROVIDER, TEMPLATE_NOT_FOUND)."
+                    },
+                    "errorCategory": {
+                      "type": "string",
+                      "enum": [
+                        "TEMPLATE",
+                        "OUTSIDE_WINDOW",
+                        "RECIPIENT",
+                        "CHANNEL",
+                        "OTHER"
+                      ],
+                      "description": "What a FAILED message's failure was about: TEMPLATE (the template was refused, paused or not approved), OUTSIDE_WINDOW (sent outside the 24 h window, where only a template goes), RECIPIENT (the number cannot receive it), CHANNEL (the channel cannot send: disconnected, blocked, unpaid) or OTHER."
                     }
                   },
                   "required": [
@@ -11619,15 +13145,37 @@
                     "chatId": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "messageIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "description": "Ids the queued messages will be stored under, in order. Empty for AI, which writes its own."
+                    },
+                    "delivery": {
+                      "type": "string",
+                      "enum": [
+                        "REPORTED",
+                        "NOT_REPORTED"
+                      ],
+                      "description": "REPORTED when the calling automation step will be told how the send went."
                     }
                   },
                   "required": [
-                    "chatId"
+                    "chatId",
+                    "messageIds",
+                    "delivery"
                   ],
                   "additionalProperties": false
                 },
                 "example": {
-                  "chatId": "6713cc481f52bb0014a7d3e9"
+                  "chatId": "6713cc481f52bb0014a7d3e9",
+                  "messageIds": [
+                    "6716d2a57e63cc0015b9f4d1"
+                  ],
+                  "delivery": "NOT_REPORTED"
                 }
               }
             }
@@ -11653,7 +13201,7 @@
             }
           }
         },
-        "description": "Starts or reuses a chat for the number and answers with its id.",
+        "description": "Starts or reuses a chat for the number and answers with its id and the ids the queued messages will be stored under; delivery is queued. `MESSAGES` sends a sequence in order, one message after the other: each item a text, or a typed message (text or media) as `MESSAGE` takes it, every type checked against the chat before anything is queued. A request repeated by the same caller with the same `Idempotency-Key` header and body answers from the first run instead of sending again; the key with a different body answers 422 `IDEMPOTENCY_KEY_REUSED`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -11675,6 +13223,12 @@
                         "type": "string",
                         "minLength": 1
                       },
+                      "deliveryTimeoutMs": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 86400000,
+                        "description": "Automations only: how long the calling step waits to hear how the send went. A message still queued by then is not sent, and the step is told it failed with DELIVERY_TIMEOUT."
+                      },
                       "method": {
                         "type": "string",
                         "enum": [
@@ -11684,9 +13238,423 @@
                       "messages": {
                         "type": "array",
                         "items": {
-                          "type": "string",
-                          "minLength": 1
-                        }
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "TEXT"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "text": {
+                                          "type": "string",
+                                          "minLength": 1
+                                        }
+                                      },
+                                      "required": [
+                                        "text"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "IMAGE"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "caption": {
+                                          "type": "string"
+                                        },
+                                        "media": {
+                                          "type": "object",
+                                          "properties": {
+                                            "url": {
+                                              "type": "string",
+                                              "format": "uri"
+                                            },
+                                            "mimeType": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "fileId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            }
+                                          },
+                                          "required": [
+                                            "url"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "required": [
+                                        "media"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "VIDEO"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "caption": {
+                                          "type": "string"
+                                        },
+                                        "media": {
+                                          "type": "object",
+                                          "properties": {
+                                            "url": {
+                                              "type": "string",
+                                              "format": "uri"
+                                            },
+                                            "mimeType": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "fileId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "isAnimated": {
+                                              "type": "boolean",
+                                              "default": false
+                                            }
+                                          },
+                                          "required": [
+                                            "url"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "required": [
+                                        "media"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "AUDIO"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "caption": {
+                                          "type": "string"
+                                        },
+                                        "media": {
+                                          "type": "object",
+                                          "properties": {
+                                            "url": {
+                                              "type": "string",
+                                              "format": "uri"
+                                            },
+                                            "mimeType": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "fileId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            }
+                                          },
+                                          "required": [
+                                            "url",
+                                            "fileId"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "required": [
+                                        "media"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "DOCUMENT"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "caption": {
+                                          "type": "string"
+                                        },
+                                        "media": {
+                                          "type": "object",
+                                          "properties": {
+                                            "url": {
+                                              "type": "string",
+                                              "format": "uri"
+                                            },
+                                            "mimeType": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "fileId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "filename": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "url"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "required": [
+                                        "media"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "STICKER"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "caption": {
+                                          "type": "string"
+                                        },
+                                        "media": {
+                                          "type": "object",
+                                          "properties": {
+                                            "url": {
+                                              "type": "string",
+                                              "format": "uri"
+                                            },
+                                            "mimeType": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "fileId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "isAnimated": {
+                                              "type": "boolean",
+                                              "default": false
+                                            }
+                                          },
+                                          "required": [
+                                            "url"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "required": [
+                                        "media"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "CONTACT"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string",
+                                          "minLength": 1
+                                        },
+                                        "phones": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "emails": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "format": "email"
+                                          }
+                                        },
+                                        "urls": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "format": "uri"
+                                          }
+                                        }
+                                      },
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "LOCATION"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "latitude": {
+                                          "type": "number"
+                                        },
+                                        "longitude": {
+                                          "type": "number"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "address": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "latitude",
+                                        "longitude"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "URL"
+                                      ]
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "properties": {
+                                        "text": {
+                                          "type": "string",
+                                          "minLength": 1
+                                        },
+                                        "showPreview": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "text"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "content"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "minItems": 1,
+                        "description": "Sent in order, one after the other. Each is a text, or a typed message (text or media: IMAGE, VIDEO, AUDIO, DOCUMENT, ...) as `MESSAGE` takes it; `messageIds` answers one id per item, in the same order."
                       }
                     },
                     "required": [
@@ -11711,6 +13679,12 @@
                       "contactId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "deliveryTimeoutMs": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 86400000,
+                        "description": "Automations only: how long the calling step waits to hear how the send went. A message still queued by then is not sent, and the step is told it failed with DELIVERY_TIMEOUT."
                       },
                       "method": {
                         "type": "string",
@@ -11740,6 +13714,12 @@
                       "contactId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "deliveryTimeoutMs": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 86400000,
+                        "description": "Automations only: how long the calling step waits to hear how the send went. A message still queued by then is not sent, and the step is told it failed with DELIVERY_TIMEOUT."
                       },
                       "method": {
                         "type": "string",
@@ -11795,6 +13775,12 @@
                       "contactId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "deliveryTimeoutMs": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 86400000,
+                        "description": "Automations only: how long the calling step waits to hear how the send went. A message still queued by then is not sent, and the step is told it failed with DELIVERY_TIMEOUT."
                       },
                       "method": {
                         "type": "string",
@@ -12323,6 +14309,25 @@
                               "enum": [
                                 "SYSTEM"
                               ]
+                            },
+                            "automation": {
+                              "type": "object",
+                              "properties": {
+                                "workflowId": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "executionId": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": [
+                                "workflowId",
+                                "executionId"
+                              ],
+                              "additionalProperties": false,
+                              "description": "The workflow run that wrote it, when an automation did."
                             }
                           },
                           "required": [
@@ -12385,6 +14390,25 @@
                               "enum": [
                                 "SYSTEM"
                               ]
+                            },
+                            "automation": {
+                              "type": "object",
+                              "properties": {
+                                "workflowId": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "executionId": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": [
+                                "workflowId",
+                                "executionId"
+                              ],
+                              "additionalProperties": false,
+                              "description": "The workflow run that wrote it, when an automation did."
                             }
                           },
                           "required": [
@@ -12615,6 +14639,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -12677,6 +14720,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -12886,6 +14948,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -12948,6 +15029,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -13167,6 +15267,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -13229,6 +15348,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -13448,6 +15586,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -13510,6 +15667,25 @@
                                 "enum": [
                                   "SYSTEM"
                                 ]
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "The workflow run that wrote it, when an automation did."
                               }
                             },
                             "required": [
@@ -15449,9 +17625,29 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "The payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
-        "description": "The stage is deleted. Pass `targetStageId` to move the deals sitting on it."
+        "description": "The stage is deleted. Answers 204 with no body. Pass `targetStageId` (an open stage of the same pipeline) to move every deal sitting on it there first; each moved deal is reported as updated. While another removal involving this stage or the target, as the stage removed or as its target, is still running, this one answers 429 with `LOCK_TIMEOUT`."
       }
     },
     "/v1/tags": {
@@ -15877,7 +18073,7 @@
             }
           }
         },
-        "description": "The tag is deleted. Answers 204 with no body."
+        "description": "The tag is deleted at once and the call answers 204 with no body. The deals holding it lose it in the background, so a deal read right after may still list it for a moment. Their automations do not take it as a tag removed from the deal."
       }
     },
     "/v1/tasks": {
@@ -15946,6 +18142,25 @@
                     "createdBy": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "createdByAutomation": {
+                      "type": "object",
+                      "properties": {
+                        "workflowId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "executionId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "workflowId",
+                        "executionId"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                     }
                   },
                   "required": [
@@ -16166,6 +18381,25 @@
                           "createdBy": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "createdByAutomation": {
+                            "type": "object",
+                            "properties": {
+                              "workflowId": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "executionId": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "workflowId",
+                              "executionId"
+                            ],
+                            "additionalProperties": false,
+                            "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                           },
                           "deal": {
                             "type": "object",
@@ -16512,6 +18746,25 @@
                     "createdBy": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "createdByAutomation": {
+                      "type": "object",
+                      "properties": {
+                        "workflowId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "executionId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "workflowId",
+                        "executionId"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                     }
                   },
                   "required": [
@@ -16774,6 +19027,25 @@
                     "createdBy": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "createdByAutomation": {
+                      "type": "object",
+                      "properties": {
+                        "workflowId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "executionId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "workflowId",
+                        "executionId"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                     }
                   },
                   "required": [
@@ -16970,6 +19242,25 @@
                       "createdBy": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "createdByAutomation": {
+                        "type": "object",
+                        "properties": {
+                          "workflowId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "executionId": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "workflowId",
+                          "executionId"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                       }
                     },
                     "required": [
@@ -17023,6 +19314,416 @@
           }
         },
         "description": "Answers with a bare array of the tasks attached to the deal, open and completed, ordered by `dueAt`."
+      }
+    },
+    "/v1/telephony/calls/{id}/transcription": {
+      "post": {
+        "tags": [
+          "Calls"
+        ],
+        "summary": "Transcribe a call",
+        "operationId": "postTelephonyCallsByIdTranscription",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "projectId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The deal the call is attached to, or the contact when it has no deal."
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "DEAL",
+                        "CONTACT"
+                      ]
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": [
+                        "API4COM"
+                      ]
+                    },
+                    "externalId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The call id on the telephony provider."
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "OUTBOUND",
+                        "INBOUND"
+                      ]
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "startedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "answeredAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "endedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "durationInSeconds": {
+                      "type": "integer",
+                      "description": "Talk time, from the answer to the hang up."
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "ANSWERED",
+                        "NO_ANSWER",
+                        "BUSY",
+                        "VOICEMAIL",
+                        "FAILED"
+                      ]
+                    },
+                    "recording": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "STORED",
+                            "UNAVAILABLE",
+                            "FAILED"
+                          ],
+                          "description": "`PENDING` while the recording is copied from the provider; only a `STORED` one can be played or transcribed."
+                        },
+                        "mimeType": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "transcription": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "AVAILABLE",
+                            "TOO_LONG",
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ],
+                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                        },
+                        "turns": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "speaker": {
+                                "type": "string",
+                                "enum": [
+                                  "SELLER",
+                                  "CUSTOMER"
+                                ],
+                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                              },
+                              "start": {
+                                "type": "number",
+                                "description": "Seconds from the start of the recording."
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "speaker",
+                              "start",
+                              "text"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "Null while there is no stored recording."
+                    },
+                    "analysis": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "The AI summary, written after each transcription; null before the first one."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projectId",
+                    "entityId",
+                    "entityType",
+                    "provider",
+                    "externalId",
+                    "direction",
+                    "from",
+                    "to",
+                    "startedAt",
+                    "endedAt",
+                    "durationInSeconds",
+                    "outcome",
+                    "recording",
+                    "transcription",
+                    "analysis",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "id": "6abd10c5812811e995a28f1f",
+                  "projectId": "665f1c2e8a94b70012d4e9a1",
+                  "entityId": "6715be3a9c40aa0013d8e5c2",
+                  "entityType": "DEAL",
+                  "provider": "API4COM",
+                  "externalId": "1759236412.4821",
+                  "direction": "OUTBOUND",
+                  "from": {
+                    "type": "EXTENSION",
+                    "number": "1000",
+                    "userId": "664d9e0b7c83aa0010f1c2d3"
+                  },
+                  "to": {
+                    "type": "PHONE",
+                    "number": "5548999998888"
+                  },
+                  "startedAt": "2026-09-30T13:40:02.000Z",
+                  "answeredAt": "2026-09-30T13:40:11.000Z",
+                  "endedAt": "2026-09-30T13:42:34.000Z",
+                  "durationInSeconds": 143,
+                  "outcome": "ANSWERED",
+                  "recording": {
+                    "status": "STORED",
+                    "mimeType": "audio/mpeg"
+                  },
+                  "transcription": {
+                    "status": "PENDING"
+                  },
+                  "analysis": null,
+                  "createdAt": "2026-09-30T13:42:40.000Z",
+                  "updatedAt": "2026-09-30T13:43:15.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Queues the transcription of a call that has none yet, or whose last one failed, and answers with the call in `PENDING`. Calls over one hour are not transcribed on their own, so this is how to get theirs. A transcription already pending or done answers the call as it is, without queuing another. Answers 404 `RECORDING` while the recording is not `STORED`, and 422 `TELEPHONY_CALL_TOO_LONG` when it is over the size the transcription accepts (about 1h40)."
       }
     }
   },
