@@ -1684,6 +1684,16 @@
               "type": "string",
               "minLength": 1
             }
+          },
+          {
+            "name": "fieldFilters",
+            "in": "query",
+            "required": false,
+            "description": "Conditions on field values, as a JSON array of `{ fieldId, fieldType?, operator, value? }`, all of which must hold. Operators: equals, not_equals, contains, not_contains, gt, gte, lt, lte, between (`from|to`), is_true, is_false, is_empty, is_not_empty. A CONTACT:PHONE equals matches the number with or without the Brazilian ninth digit. Ignored by `search`.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         ],
         "responses": {
