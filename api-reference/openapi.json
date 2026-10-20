@@ -67,6 +67,10 @@
     {
       "name": "Tasks",
       "description": "Follow-up activities with a due date, attached to a deal and assigned to a user."
+    },
+    {
+      "name": "Touchpoints",
+      "description": "Each time a lead reached the business, traced to the ad, campaign, channel or form that brought it."
     }
   ],
   "paths": {
@@ -19734,6 +19738,856 @@
           }
         },
         "description": "Queues the transcription of a call that has none yet, or whose last one failed, and answers with the call in `PENDING`. Calls over one hour are not transcribed on their own, so this is how to get theirs. A transcription already pending or done answers the call as it is, without queuing another. Answers 404 `RECORDING` while the recording is not `STORED`, and 422 `TELEPHONY_CALL_TOO_LONG` when it is over the size the transcription accepts (about 1h40)."
+      }
+    },
+    "/v1/deals/{dealId}/touchpoints": {
+      "get": {
+        "tags": [
+          "Touchpoints"
+        ],
+        "summary": "List the touchpoints of a deal",
+        "operationId": "getDealsByDealIdTouchpoints",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dealId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "contactId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Absent only while the chat it was read from, or the deal it came with, has no contact yet."
+                      },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The chat it was read from."
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The lead message it came with, such as the first message after an ad click."
+                      },
+                      "dealId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The deal it created or fed; absent when it went to no deal."
+                      },
+                      "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "entry": {
+                        "type": "string",
+                        "enum": [
+                          "FORM",
+                          "MESSAGE",
+                          "CALL",
+                          "MANUAL",
+                          "IMPORT",
+                          "UNKNOWN"
+                        ],
+                        "description": "How the lead came in: `FORM` (a site or Meta form, or the chatbot), `MESSAGE` (wrote on a channel), `CALL`, `MANUAL` (someone added it), `IMPORT` (a spreadsheet) or `UNKNOWN`."
+                      },
+                      "traffic": {
+                        "type": "string",
+                        "enum": [
+                          "PAID_SEARCH",
+                          "PAID_SOCIAL",
+                          "PAID_VIDEO",
+                          "PAID_AI",
+                          "PAID_OTHER",
+                          "ORGANIC_SEARCH",
+                          "ORGANIC_SOCIAL",
+                          "AI_REFERRAL",
+                          "REFERRAL",
+                          "RECOMMENDATION",
+                          "EMAIL",
+                          "DIRECT",
+                          "OFFLINE"
+                        ],
+                        "description": "What kind of traffic brought it, worked out from the platform, the click ids, the source and the UTMs."
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "Normalized source: `google`, `instagram`, `chatgpt`, `whatsapp`... `direct` when nothing tells."
+                      },
+                      "platform": {
+                        "type": "string",
+                        "enum": [
+                          "META",
+                          "GOOGLE",
+                          "OPENAI",
+                          "TIKTOK",
+                          "LINKEDIN",
+                          "MICROSOFT"
+                        ],
+                        "description": "Who sold the ad, present on paid traffic."
+                      },
+                      "campaign": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "adset": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "ad": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "via": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "CHANNEL",
+                              "CHATBOT",
+                              "META_FORM",
+                              "SITE_FORM",
+                              "PHONE",
+                              "USER",
+                              "CAMPAIGN",
+                              "AUTOMATION",
+                              "API",
+                              "IMPORT",
+                              "INTEGRATION"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "The name it had then."
+                          },
+                          "provider": {
+                            "type": "string",
+                            "enum": [
+                              "ZAPI",
+                              "CUSTOM",
+                              "WABA",
+                              "UAZAPI"
+                            ]
+                          },
+                          "phoneNumber": {
+                            "type": "string",
+                            "description": "The number the lead came in through, digits only."
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Where in Leadstaker it came in (a channel, the chatbot, a form, a phone line) or who or what put it there (a user, a campaign, an automation, the API, an import, an integration)."
+                      },
+                      "utm": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string"
+                          },
+                          "medium": {
+                            "type": "string"
+                          },
+                          "campaign": {
+                            "type": "string"
+                          },
+                          "term": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "The UTMs as they came in the URL."
+                      },
+                      "clickIds": {
+                        "type": "object",
+                        "properties": {
+                          "gclid": {
+                            "type": "string"
+                          },
+                          "gbraid": {
+                            "type": "string"
+                          },
+                          "wbraid": {
+                            "type": "string"
+                          },
+                          "fbclid": {
+                            "type": "string"
+                          },
+                          "fbc": {
+                            "type": "string"
+                          },
+                          "fbp": {
+                            "type": "string"
+                          },
+                          "ctwaclid": {
+                            "type": "string",
+                            "description": "Click-to-WhatsApp click id, on a conversation opened from a Meta ad."
+                          },
+                          "oppref": {
+                            "type": "string"
+                          },
+                          "ttclid": {
+                            "type": "string"
+                          },
+                          "msclkid": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "What the ad platforms match a conversion to the click on, each under the platform's own name for it."
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "The page the lead came from."
+                      },
+                      "record": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "CHAT",
+                              "CHATBOT_SESSION",
+                              "META_LEAD",
+                              "CALL",
+                              "IMPORT",
+                              "CONNECTION_LINK",
+                              "DEAL",
+                              "EXTERNAL"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record it was read from."
+                      },
+                      "editableOrigin": {
+                        "type": "boolean",
+                        "description": "Whether nothing traced it, so a person may pick its origin on the dashboard."
+                      },
+                      "manualOrigin": {
+                        "type": "string",
+                        "enum": [
+                          "RECOMMENDATION",
+                          "OUTBOUND",
+                          "IN_PERSON"
+                        ],
+                        "description": "The origin a person picked, or `OUTBOUND` when the team reached out first."
+                      },
+                      "isFirstTouch": {
+                        "type": "boolean",
+                        "description": "The deal's first touch; absent on a touch with no deal."
+                      },
+                      "isLastTouch": {
+                        "type": "boolean",
+                        "description": "The deal's latest touch; absent on a touch with no deal."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "occurredAt",
+                      "entry",
+                      "traffic",
+                      "source",
+                      "record",
+                      "editableOrigin"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6716a2f09c40aa0013d8e6a1",
+                    "contactId": "6715be3a9c40aa0013d8e5b0",
+                    "chatId": "6715be3a9c40aa0013d8e5b4",
+                    "messageId": "6716a2ef9c40aa0013d8e69f",
+                    "dealId": "6715be3a9c40aa0013d8e5c2",
+                    "occurredAt": "2026-10-14T18:22:05.000Z",
+                    "entry": "MESSAGE",
+                    "traffic": "PAID_SOCIAL",
+                    "source": "instagram",
+                    "platform": "META",
+                    "ad": {
+                      "id": "120214567890123456"
+                    },
+                    "via": {
+                      "type": "CHANNEL",
+                      "id": "665f1d0a8a94b70012d4e9b7",
+                      "name": "Comercial",
+                      "provider": "WABA",
+                      "phoneNumber": "554830250000"
+                    },
+                    "clickIds": {
+                      "ctwaclid": "ARAkLkA8rmlFeiCktEJQ-QTwRiyYHAFDLMNDBH0CD3qpjd0HR4irJ6LE"
+                    },
+                    "url": "https://www.instagram.com/p/DPq1x2yAbCd/",
+                    "record": {
+                      "type": "CHAT",
+                      "id": "6715be3a9c40aa0013d8e5b4:ARAkLkA8rmlFeiCktEJQ-QTwRiyYHAFDLMNDBH0CD3qpjd0HR4irJ6LE"
+                    },
+                    "editableOrigin": false,
+                    "isFirstTouch": false,
+                    "isLastTouch": true
+                  },
+                  {
+                    "id": "6715be3b9c40aa0013d8e5c9",
+                    "contactId": "6715be3a9c40aa0013d8e5b0",
+                    "dealId": "6715be3a9c40aa0013d8e5c2",
+                    "occurredAt": "2026-10-11T13:05:40.000Z",
+                    "entry": "FORM",
+                    "traffic": "PAID_SEARCH",
+                    "source": "google",
+                    "platform": "GOOGLE",
+                    "via": {
+                      "type": "CHATBOT",
+                      "id": "6650a1b28a94b70012d4e010",
+                      "name": "Chatbot do site"
+                    },
+                    "utm": {
+                      "source": "google",
+                      "medium": "cpc",
+                      "campaign": "implantes-floripa",
+                      "term": "implante dentario preco"
+                    },
+                    "clickIds": {
+                      "gclid": "Cj0KCQjw4bipBhCyARIsAFsieCwT9sN2"
+                    },
+                    "url": "https://clinica.example.com/implantes?utm_source=google&utm_medium=cpc&utm_campaign=implantes-floripa&gclid=Cj0KCQjw4bipBhCyARIsAFsieCwT9sN2",
+                    "record": {
+                      "type": "CHATBOT_SESSION",
+                      "id": "6715be2f9c40aa0013d8e5a8"
+                    },
+                    "editableOrigin": false,
+                    "isFirstTouch": true,
+                    "isLastTouch": false
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Answers with a bare array of touchpoints, the latest first and at most the latest 100, without an envelope or pagination fields. A touchpoint is one time the lead reached the business, traced as far as it can be: an ad click that opened a WhatsApp conversation, a form or chatbot session with its UTMs and click ids, a call, a spreadsheet import, or a deal someone added by hand. They are written moments after the deal they go to, an ad click by its own job and, for a deal nothing traced, a default one about two minutes later, so a deal read right after it is created may not have them yet. Only the touchpoints that created or fed this deal come back; `isFirstTouch` and `isLastTouch` mark its first and latest ones."
+      }
+    },
+    "/v1/contacts/{contactId}/touchpoints": {
+      "get": {
+        "tags": [
+          "Touchpoints"
+        ],
+        "summary": "List the touchpoints of a contact",
+        "operationId": "getContactsByContactIdTouchpoints",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "contactId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Absent only while the chat it was read from, or the deal it came with, has no contact yet."
+                      },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The chat it was read from."
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The lead message it came with, such as the first message after an ad click."
+                      },
+                      "dealId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The deal it created or fed; absent when it went to no deal."
+                      },
+                      "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "entry": {
+                        "type": "string",
+                        "enum": [
+                          "FORM",
+                          "MESSAGE",
+                          "CALL",
+                          "MANUAL",
+                          "IMPORT",
+                          "UNKNOWN"
+                        ],
+                        "description": "How the lead came in: `FORM` (a site or Meta form, or the chatbot), `MESSAGE` (wrote on a channel), `CALL`, `MANUAL` (someone added it), `IMPORT` (a spreadsheet) or `UNKNOWN`."
+                      },
+                      "traffic": {
+                        "type": "string",
+                        "enum": [
+                          "PAID_SEARCH",
+                          "PAID_SOCIAL",
+                          "PAID_VIDEO",
+                          "PAID_AI",
+                          "PAID_OTHER",
+                          "ORGANIC_SEARCH",
+                          "ORGANIC_SOCIAL",
+                          "AI_REFERRAL",
+                          "REFERRAL",
+                          "RECOMMENDATION",
+                          "EMAIL",
+                          "DIRECT",
+                          "OFFLINE"
+                        ],
+                        "description": "What kind of traffic brought it, worked out from the platform, the click ids, the source and the UTMs."
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "Normalized source: `google`, `instagram`, `chatgpt`, `whatsapp`... `direct` when nothing tells."
+                      },
+                      "platform": {
+                        "type": "string",
+                        "enum": [
+                          "META",
+                          "GOOGLE",
+                          "OPENAI",
+                          "TIKTOK",
+                          "LINKEDIN",
+                          "MICROSOFT"
+                        ],
+                        "description": "Who sold the ad, present on paid traffic."
+                      },
+                      "campaign": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "adset": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "ad": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "via": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "CHANNEL",
+                              "CHATBOT",
+                              "META_FORM",
+                              "SITE_FORM",
+                              "PHONE",
+                              "USER",
+                              "CAMPAIGN",
+                              "AUTOMATION",
+                              "API",
+                              "IMPORT",
+                              "INTEGRATION"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "The name it had then."
+                          },
+                          "provider": {
+                            "type": "string",
+                            "enum": [
+                              "ZAPI",
+                              "CUSTOM",
+                              "WABA",
+                              "UAZAPI"
+                            ]
+                          },
+                          "phoneNumber": {
+                            "type": "string",
+                            "description": "The number the lead came in through, digits only."
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Where in Leadstaker it came in (a channel, the chatbot, a form, a phone line) or who or what put it there (a user, a campaign, an automation, the API, an import, an integration)."
+                      },
+                      "utm": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string"
+                          },
+                          "medium": {
+                            "type": "string"
+                          },
+                          "campaign": {
+                            "type": "string"
+                          },
+                          "term": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "The UTMs as they came in the URL."
+                      },
+                      "clickIds": {
+                        "type": "object",
+                        "properties": {
+                          "gclid": {
+                            "type": "string"
+                          },
+                          "gbraid": {
+                            "type": "string"
+                          },
+                          "wbraid": {
+                            "type": "string"
+                          },
+                          "fbclid": {
+                            "type": "string"
+                          },
+                          "fbc": {
+                            "type": "string"
+                          },
+                          "fbp": {
+                            "type": "string"
+                          },
+                          "ctwaclid": {
+                            "type": "string",
+                            "description": "Click-to-WhatsApp click id, on a conversation opened from a Meta ad."
+                          },
+                          "oppref": {
+                            "type": "string"
+                          },
+                          "ttclid": {
+                            "type": "string"
+                          },
+                          "msclkid": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "What the ad platforms match a conversion to the click on, each under the platform's own name for it."
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "The page the lead came from."
+                      },
+                      "record": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "CHAT",
+                              "CHATBOT_SESSION",
+                              "META_LEAD",
+                              "CALL",
+                              "IMPORT",
+                              "CONNECTION_LINK",
+                              "DEAL",
+                              "EXTERNAL"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record it was read from."
+                      },
+                      "editableOrigin": {
+                        "type": "boolean",
+                        "description": "Whether nothing traced it, so a person may pick its origin on the dashboard."
+                      },
+                      "manualOrigin": {
+                        "type": "string",
+                        "enum": [
+                          "RECOMMENDATION",
+                          "OUTBOUND",
+                          "IN_PERSON"
+                        ],
+                        "description": "The origin a person picked, or `OUTBOUND` when the team reached out first."
+                      },
+                      "isFirstTouch": {
+                        "type": "boolean",
+                        "description": "The deal's first touch; absent on a touch with no deal."
+                      },
+                      "isLastTouch": {
+                        "type": "boolean",
+                        "description": "The deal's latest touch; absent on a touch with no deal."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "occurredAt",
+                      "entry",
+                      "traffic",
+                      "source",
+                      "record",
+                      "editableOrigin"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "example": [
+                  {
+                    "id": "6716a2f09c40aa0013d8e6a1",
+                    "contactId": "6715be3a9c40aa0013d8e5b0",
+                    "chatId": "6715be3a9c40aa0013d8e5b4",
+                    "messageId": "6716a2ef9c40aa0013d8e69f",
+                    "dealId": "6715be3a9c40aa0013d8e5c2",
+                    "occurredAt": "2026-10-14T18:22:05.000Z",
+                    "entry": "MESSAGE",
+                    "traffic": "PAID_SOCIAL",
+                    "source": "instagram",
+                    "platform": "META",
+                    "ad": {
+                      "id": "120214567890123456"
+                    },
+                    "via": {
+                      "type": "CHANNEL",
+                      "id": "665f1d0a8a94b70012d4e9b7",
+                      "name": "Comercial",
+                      "provider": "WABA",
+                      "phoneNumber": "554830250000"
+                    },
+                    "clickIds": {
+                      "ctwaclid": "ARAkLkA8rmlFeiCktEJQ-QTwRiyYHAFDLMNDBH0CD3qpjd0HR4irJ6LE"
+                    },
+                    "url": "https://www.instagram.com/p/DPq1x2yAbCd/",
+                    "record": {
+                      "type": "CHAT",
+                      "id": "6715be3a9c40aa0013d8e5b4:ARAkLkA8rmlFeiCktEJQ-QTwRiyYHAFDLMNDBH0CD3qpjd0HR4irJ6LE"
+                    },
+                    "editableOrigin": false,
+                    "isFirstTouch": false,
+                    "isLastTouch": true
+                  },
+                  {
+                    "id": "6715be3b9c40aa0013d8e5c9",
+                    "contactId": "6715be3a9c40aa0013d8e5b0",
+                    "dealId": "6715be3a9c40aa0013d8e5c2",
+                    "occurredAt": "2026-10-11T13:05:40.000Z",
+                    "entry": "FORM",
+                    "traffic": "PAID_SEARCH",
+                    "source": "google",
+                    "platform": "GOOGLE",
+                    "via": {
+                      "type": "CHATBOT",
+                      "id": "6650a1b28a94b70012d4e010",
+                      "name": "Chatbot do site"
+                    },
+                    "utm": {
+                      "source": "google",
+                      "medium": "cpc",
+                      "campaign": "implantes-floripa",
+                      "term": "implante dentario preco"
+                    },
+                    "clickIds": {
+                      "gclid": "Cj0KCQjw4bipBhCyARIsAFsieCwT9sN2"
+                    },
+                    "url": "https://clinica.example.com/implantes?utm_source=google&utm_medium=cpc&utm_campaign=implantes-floripa&gclid=Cj0KCQjw4bipBhCyARIsAFsieCwT9sN2",
+                    "record": {
+                      "type": "CHATBOT_SESSION",
+                      "id": "6715be2f9c40aa0013d8e5a8"
+                    },
+                    "editableOrigin": false,
+                    "isFirstTouch": true,
+                    "isLastTouch": false
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Answers with a bare array of touchpoints, the latest first and at most the latest 100, without an envelope or pagination fields. A touchpoint is one time the lead reached the business, traced as far as it can be: an ad click that opened a WhatsApp conversation, a form or chatbot session with its UTMs and click ids, a call, a spreadsheet import, or a deal someone added by hand. They are written moments after the deal they go to, an ad click by its own job and, for a deal nothing traced, a default one about two minutes later, so a deal read right after it is created may not have them yet. Spans the deals of the contact, each touchpoint naming the `dealId` it went to, plus those that went to no deal; touchpoints of deals the caller cannot see are left out."
       }
     }
   },
