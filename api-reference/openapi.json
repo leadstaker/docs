@@ -14,7 +14,7 @@
   "tags": [
     {
       "name": "Calls",
-      "description": "Phone calls made through the telephony app, with their recording, transcript and AI summary."
+      "description": "Phone calls made through the telephony app or posted from another phone system, with their recording, transcript and AI summary."
     },
     {
       "name": "Chats",
@@ -74,6 +74,882 @@
     }
   ],
   "paths": {
+    "/v1/calls": {
+      "post": {
+        "tags": [
+          "Calls"
+        ],
+        "summary": "Post a call",
+        "operationId": "postCalls",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "projectId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The deal the call is attached to, or the contact when it has no deal."
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "DEAL",
+                        "CONTACT"
+                      ]
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": [
+                        "API4COM",
+                        "API"
+                      ],
+                      "description": "The telephony provider, or `API` for a call posted to `POST /calls`."
+                    },
+                    "externalId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The call id on the telephony provider, or in the system that posted it."
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "OUTBOUND",
+                        "INBOUND"
+                      ]
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "startedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "answeredAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "endedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "durationInSeconds": {
+                      "type": "integer",
+                      "description": "Talk time, from the answer to the hang up."
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "ANSWERED",
+                        "NO_ANSWER",
+                        "BUSY",
+                        "VOICEMAIL",
+                        "FAILED"
+                      ]
+                    },
+                    "recording": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "STORED",
+                            "UNAVAILABLE",
+                            "FAILED"
+                          ],
+                          "description": "`PENDING` while the recording is copied from the provider; only a `STORED` one can be played or transcribed."
+                        },
+                        "mimeType": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "transcription": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "AVAILABLE",
+                            "TOO_LONG",
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ],
+                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                        },
+                        "turns": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "speaker": {
+                                "type": "string",
+                                "enum": [
+                                  "SELLER",
+                                  "CUSTOMER"
+                                ],
+                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                              },
+                              "start": {
+                                "type": "number",
+                                "description": "Seconds from the start of the recording."
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "speaker",
+                              "start",
+                              "text"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "Null while there is no stored recording."
+                    },
+                    "analysis": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "The AI summary, written after each transcription; null before the first one."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projectId",
+                    "entityId",
+                    "entityType",
+                    "provider",
+                    "externalId",
+                    "direction",
+                    "from",
+                    "to",
+                    "startedAt",
+                    "endedAt",
+                    "durationInSeconds",
+                    "outcome",
+                    "recording",
+                    "transcription",
+                    "analysis",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "id": "6abd10c5812811e995a28f1f",
+                  "projectId": "665f1c2e8a94b70012d4e9a1",
+                  "entityId": "6715be3a9c40aa0013d8e5c2",
+                  "entityType": "DEAL",
+                  "provider": "API",
+                  "externalId": "3c-88412093",
+                  "direction": "OUTBOUND",
+                  "from": {
+                    "type": "EXTENSION",
+                    "userId": "664d9e0b7c83aa0010f1c2d3"
+                  },
+                  "to": {
+                    "type": "PHONE",
+                    "number": "5548999998888"
+                  },
+                  "startedAt": "2026-09-30T13:40:02.000Z",
+                  "answeredAt": "2026-09-30T13:40:11.000Z",
+                  "endedAt": "2026-09-30T13:42:34.000Z",
+                  "durationInSeconds": 143,
+                  "outcome": "ANSWERED",
+                  "recording": {
+                    "status": "STORED",
+                    "mimeType": "audio/mpeg"
+                  },
+                  "transcription": {
+                    "status": "PENDING"
+                  },
+                  "analysis": null,
+                  "createdAt": "2026-09-30T13:42:40.000Z",
+                  "updatedAt": "2026-09-30T13:43:15.000Z"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "projectId": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The deal the call is attached to, or the contact when it has no deal."
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "DEAL",
+                        "CONTACT"
+                      ]
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": [
+                        "API4COM",
+                        "API"
+                      ],
+                      "description": "The telephony provider, or `API` for a call posted to `POST /calls`."
+                    },
+                    "externalId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The call id on the telephony provider, or in the system that posted it."
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "OUTBOUND",
+                        "INBOUND"
+                      ]
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "EXTENSION"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
+                            },
+                            "userId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "The user holding the extension; absent while the extension is not mapped to anyone."
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "PHONE"
+                              ]
+                            },
+                            "number": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Digits with the country code, e.g. `5548999998888`."
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "number"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "startedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "answeredAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "endedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "durationInSeconds": {
+                      "type": "integer",
+                      "description": "Talk time, from the answer to the hang up."
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "ANSWERED",
+                        "NO_ANSWER",
+                        "BUSY",
+                        "VOICEMAIL",
+                        "FAILED"
+                      ]
+                    },
+                    "recording": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "STORED",
+                            "UNAVAILABLE",
+                            "FAILED"
+                          ],
+                          "description": "`PENDING` while the recording is copied from the provider; only a `STORED` one can be played or transcribed."
+                        },
+                        "mimeType": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "transcription": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "AVAILABLE",
+                            "TOO_LONG",
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ],
+                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                        },
+                        "turns": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "speaker": {
+                                "type": "string",
+                                "enum": [
+                                  "SELLER",
+                                  "CUSTOMER"
+                                ],
+                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                              },
+                              "start": {
+                                "type": "number",
+                                "description": "Seconds from the start of the recording."
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "speaker",
+                              "start",
+                              "text"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "Null while there is no stored recording."
+                    },
+                    "analysis": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "DONE",
+                            "FAILED"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "The AI summary, written after each transcription; null before the first one."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projectId",
+                    "entityId",
+                    "entityType",
+                    "provider",
+                    "externalId",
+                    "direction",
+                    "from",
+                    "to",
+                    "startedAt",
+                    "endedAt",
+                    "durationInSeconds",
+                    "outcome",
+                    "recording",
+                    "transcription",
+                    "analysis",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "id": "6abd10c5812811e995a28f1f",
+                  "projectId": "665f1c2e8a94b70012d4e9a1",
+                  "entityId": "6715be3a9c40aa0013d8e5c2",
+                  "entityType": "DEAL",
+                  "provider": "API",
+                  "externalId": "3c-88412093",
+                  "direction": "OUTBOUND",
+                  "from": {
+                    "type": "EXTENSION",
+                    "userId": "664d9e0b7c83aa0010f1c2d3"
+                  },
+                  "to": {
+                    "type": "PHONE",
+                    "number": "5548999998888"
+                  },
+                  "startedAt": "2026-09-30T13:40:02.000Z",
+                  "answeredAt": "2026-09-30T13:40:11.000Z",
+                  "endedAt": "2026-09-30T13:42:34.000Z",
+                  "durationInSeconds": 143,
+                  "outcome": "ANSWERED",
+                  "recording": {
+                    "status": "STORED",
+                    "mimeType": "audio/mpeg"
+                  },
+                  "transcription": {
+                    "status": "PENDING"
+                  },
+                  "analysis": null,
+                  "createdAt": "2026-09-30T13:42:40.000Z",
+                  "updatedAt": "2026-09-30T13:43:15.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Stores a finished call made on another phone system, such as a dialer, together with its audio, and gives it the same path as a call of the telephony app. The phone finds the contact and its open deal, or creates them with `userId` as responsible, unless `dealId` pins the call. Answered calls up to one hour are transcribed right away, so the call usually comes back in `PENDING`, and the AI analysis then writes what was said into the fields of the deal and the contact. A call without its audio is refused and nothing is created. Answers 201 with the new call, or 200 with the stored one when the `externalId` was posted before, without creating or uploading anything again. The body may reach about 32 MB; a larger one is refused with 413.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "externalId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "The call id in your system. Posting it again returns the stored call instead of a second one."
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "OUTBOUND",
+                      "INBOUND"
+                    ],
+                    "description": "`OUTBOUND` when the salesperson placed the call, `INBOUND` when the lead did."
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The lead phone with its country code, e.g. `5548999998888`. It finds the contact, or creates one."
+                  },
+                  "userId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-f\\d]{24}$",
+                    "description": "The project member who talked. Responsible for the contact and deal the call creates."
+                  },
+                  "startedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 instant with an explicit offset, e.g. 2026-10-21T14:05:00-03:00."
+                  },
+                  "answeredAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Absent when nobody answered. The talk time runs from here to `endedAt`."
+                  },
+                  "endedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 instant with an explicit offset, e.g. 2026-10-21T14:05:00-03:00."
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "enum": [
+                      "ANSWERED",
+                      "NO_ANSWER",
+                      "BUSY",
+                      "VOICEMAIL",
+                      "FAILED"
+                    ]
+                  },
+                  "recording": {
+                    "type": "object",
+                    "properties": {
+                      "base64": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 33554432,
+                        "description": "The audio file encoded as base64, without a `data:` prefix. Up to 24 MB before encoding."
+                      },
+                      "mimeType": {
+                        "type": "string",
+                        "enum": [
+                          "audio/mpeg",
+                          "audio/mp3",
+                          "audio/wav",
+                          "audio/x-wav",
+                          "audio/wave",
+                          "audio/mp4",
+                          "audio/aac",
+                          "audio/ogg",
+                          "audio/opus",
+                          "audio/webm",
+                          "audio/flac"
+                        ]
+                      },
+                      "channels": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "SELLER",
+                            "CUSTOMER"
+                          ]
+                        },
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "description": "Who each channel of a stereo recording holds, left first, e.g. `[\"SELLER\", \"CUSTOMER\"]`. With it the transcript tells the salesperson from the customer; without it, or on a mono file, the call is transcribed as one block."
+                      }
+                    },
+                    "required": [
+                      "base64",
+                      "mimeType"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Required: a call is never stored without its audio."
+                  },
+                  "dealId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-f\\d]{24}$",
+                    "description": "Attaches the call to this deal. Without it the phone decides: the contact's open deal, or a new one."
+                  },
+                  "pipelineId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-f\\d]{24}$",
+                    "description": "Where a deal the call creates starts. Send it with `stageId`; without both, the first open stage of the oldest pipeline."
+                  },
+                  "stageId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "An open stage of `pipelineId`."
+                  }
+                },
+                "required": [
+                  "externalId",
+                  "direction",
+                  "phone",
+                  "userId",
+                  "startedAt",
+                  "endedAt",
+                  "outcome",
+                  "recording"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/deals/{dealId}/calls": {
       "get": {
         "tags": [
@@ -151,13 +1027,15 @@
                       "provider": {
                         "type": "string",
                         "enum": [
-                          "API4COM"
-                        ]
+                          "API4COM",
+                          "API"
+                        ],
+                        "description": "The telephony provider, or `API` for a call posted to `POST /calls`."
                       },
                       "externalId": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "The call id on the telephony provider."
+                        "description": "The call id on the telephony provider, or in the system that posted it."
                       },
                       "direction": {
                         "type": "string",
@@ -180,7 +1058,7 @@
                               "number": {
                                 "type": "string",
                                 "minLength": 1,
-                                "description": "The extension on the telephony provider, e.g. `1000`."
+                                "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                               },
                               "userId": {
                                 "type": "string",
@@ -189,8 +1067,7 @@
                               }
                             },
                             "required": [
-                              "type",
-                              "number"
+                              "type"
                             ],
                             "additionalProperties": false
                           },
@@ -231,7 +1108,7 @@
                               "number": {
                                 "type": "string",
                                 "minLength": 1,
-                                "description": "The extension on the telephony provider, e.g. `1000`."
+                                "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                               },
                               "userId": {
                                 "type": "string",
@@ -240,8 +1117,7 @@
                               }
                             },
                             "required": [
-                              "type",
-                              "number"
+                              "type"
                             ],
                             "additionalProperties": false
                           },
@@ -593,13 +1469,15 @@
                       "provider": {
                         "type": "string",
                         "enum": [
-                          "API4COM"
-                        ]
+                          "API4COM",
+                          "API"
+                        ],
+                        "description": "The telephony provider, or `API` for a call posted to `POST /calls`."
                       },
                       "externalId": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "The call id on the telephony provider."
+                        "description": "The call id on the telephony provider, or in the system that posted it."
                       },
                       "direction": {
                         "type": "string",
@@ -622,7 +1500,7 @@
                               "number": {
                                 "type": "string",
                                 "minLength": 1,
-                                "description": "The extension on the telephony provider, e.g. `1000`."
+                                "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                               },
                               "userId": {
                                 "type": "string",
@@ -631,8 +1509,7 @@
                               }
                             },
                             "required": [
-                              "type",
-                              "number"
+                              "type"
                             ],
                             "additionalProperties": false
                           },
@@ -673,7 +1550,7 @@
                               "number": {
                                 "type": "string",
                                 "minLength": 1,
-                                "description": "The extension on the telephony provider, e.g. `1000`."
+                                "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                               },
                               "userId": {
                                 "type": "string",
@@ -682,8 +1559,7 @@
                               }
                             },
                             "required": [
-                              "type",
-                              "number"
+                              "type"
                             ],
                             "additionalProperties": false
                           },
@@ -1079,12 +1955,10 @@
                             "type": "object",
                             "properties": {
                               "name": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               },
                               "avatar": {
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               }
                             },
                             "additionalProperties": false
@@ -1139,7 +2013,6 @@
                           },
                           "channelName": {
                             "type": "string",
-                            "minLength": 1,
                             "nullable": true,
                             "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                           }
@@ -1311,12 +2184,10 @@
                       "type": "object",
                       "properties": {
                         "name": {
-                          "type": "string",
-                          "minLength": 1
+                          "type": "string"
                         },
                         "avatar": {
-                          "type": "string",
-                          "minLength": 1
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -1371,7 +2242,6 @@
                     },
                     "channelName": {
                       "type": "string",
-                      "minLength": 1,
                       "nullable": true,
                       "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                     }
@@ -1718,8 +2588,7 @@
                             "minLength": 1
                           },
                           "avatar": {
-                            "type": "string",
-                            "minLength": 1
+                            "type": "string"
                           },
                           "fields": {
                             "type": "array",
@@ -1852,8 +2721,7 @@
                       "minLength": 1
                     },
                     "avatar": {
-                      "type": "string",
-                      "minLength": 1
+                      "type": "string"
                     },
                     "fields": {
                       "type": "array",
@@ -1929,8 +2797,7 @@
                       "minLength": 1
                     },
                     "avatar": {
-                      "type": "string",
-                      "minLength": 1
+                      "type": "string"
                     },
                     "fields": {
                       "type": "array",
@@ -2094,8 +2961,7 @@
                       "minLength": 1
                     },
                     "avatar": {
-                      "type": "string",
-                      "minLength": 1
+                      "type": "string"
                     },
                     "fields": {
                       "type": "array",
@@ -19384,13 +20250,15 @@
                     "provider": {
                       "type": "string",
                       "enum": [
-                        "API4COM"
-                      ]
+                        "API4COM",
+                        "API"
+                      ],
+                      "description": "The telephony provider, or `API` for a call posted to `POST /calls`."
                     },
                     "externalId": {
                       "type": "string",
                       "minLength": 1,
-                      "description": "The call id on the telephony provider."
+                      "description": "The call id on the telephony provider, or in the system that posted it."
                     },
                     "direction": {
                       "type": "string",
@@ -19413,7 +20281,7 @@
                             "number": {
                               "type": "string",
                               "minLength": 1,
-                              "description": "The extension on the telephony provider, e.g. `1000`."
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                             },
                             "userId": {
                               "type": "string",
@@ -19422,8 +20290,7 @@
                             }
                           },
                           "required": [
-                            "type",
-                            "number"
+                            "type"
                           ],
                           "additionalProperties": false
                         },
@@ -19464,7 +20331,7 @@
                             "number": {
                               "type": "string",
                               "minLength": 1,
-                              "description": "The extension on the telephony provider, e.g. `1000`."
+                              "description": "The extension on the telephony provider, e.g. `1000`. Absent on a call posted to `POST /calls`."
                             },
                             "userId": {
                               "type": "string",
@@ -19473,8 +20340,7 @@
                             }
                           },
                           "required": [
-                            "type",
-                            "number"
+                            "type"
                           ],
                           "additionalProperties": false
                         },
