@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Leadstaker API",
     "version": "1.0.0",
@@ -142,9 +142,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -167,9 +165,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -192,9 +188,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -217,9 +211,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -285,82 +277,94 @@
                       "additionalProperties": false
                     },
                     "transcription": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "AVAILABLE",
-                            "TOO_LONG",
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ],
-                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
-                        },
-                        "text": {
-                          "type": "string",
-                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
-                        },
-                        "turns": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "speaker": {
-                                "type": "string",
-                                "enum": [
-                                  "SELLER",
-                                  "CUSTOMER"
-                                ],
-                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
-                              },
-                              "start": {
-                                "type": "number",
-                                "description": "Seconds from the start of the recording."
-                              },
-                              "text": {
-                                "type": "string"
-                              }
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "AVAILABLE",
+                                "TOO_LONG",
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ],
+                              "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
                             },
-                            "required": [
-                              "speaker",
-                              "start",
-                              "text"
-                            ],
-                            "additionalProperties": false
+                            "text": {
+                              "type": "string",
+                              "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                            },
+                            "turns": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "speaker": {
+                                    "type": "string",
+                                    "enum": [
+                                      "SELLER",
+                                      "CUSTOMER"
+                                    ],
+                                    "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                  },
+                                  "start": {
+                                    "type": "number",
+                                    "description": "Seconds from the start of the recording."
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "speaker",
+                                  "start",
+                                  "text"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                            }
                           },
-                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "Null while there is no stored recording."
                     },
                     "analysis": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ]
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ]
+                            },
+                            "summary": {
+                              "type": "string",
+                              "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                            }
+                          },
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
                         },
-                        "summary": {
-                          "type": "string",
-                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "The AI summary, written after each transcription; null before the first one."
                     },
                     "createdAt": {
@@ -483,9 +487,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -508,9 +510,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -533,9 +533,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -558,9 +556,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -626,82 +622,94 @@
                       "additionalProperties": false
                     },
                     "transcription": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "AVAILABLE",
-                            "TOO_LONG",
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ],
-                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
-                        },
-                        "text": {
-                          "type": "string",
-                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
-                        },
-                        "turns": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "speaker": {
-                                "type": "string",
-                                "enum": [
-                                  "SELLER",
-                                  "CUSTOMER"
-                                ],
-                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
-                              },
-                              "start": {
-                                "type": "number",
-                                "description": "Seconds from the start of the recording."
-                              },
-                              "text": {
-                                "type": "string"
-                              }
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "AVAILABLE",
+                                "TOO_LONG",
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ],
+                              "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
                             },
-                            "required": [
-                              "speaker",
-                              "start",
-                              "text"
-                            ],
-                            "additionalProperties": false
+                            "text": {
+                              "type": "string",
+                              "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                            },
+                            "turns": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "speaker": {
+                                    "type": "string",
+                                    "enum": [
+                                      "SELLER",
+                                      "CUSTOMER"
+                                    ],
+                                    "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                  },
+                                  "start": {
+                                    "type": "number",
+                                    "description": "Seconds from the start of the recording."
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "speaker",
+                                  "start",
+                                  "text"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                            }
                           },
-                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "Null while there is no stored recording."
                     },
                     "analysis": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ]
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ]
+                            },
+                            "summary": {
+                              "type": "string",
+                              "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                            }
+                          },
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
                         },
-                        "summary": {
-                          "type": "string",
-                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "The AI summary, written after each transcription; null before the first one."
                     },
                     "createdAt": {
@@ -1051,9 +1059,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "EXTENSION"
-                                ]
+                                "const": "EXTENSION"
                               },
                               "number": {
                                 "type": "string",
@@ -1076,9 +1082,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "PHONE"
-                                ]
+                                "const": "PHONE"
                               },
                               "number": {
                                 "type": "string",
@@ -1101,9 +1105,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "EXTENSION"
-                                ]
+                                "const": "EXTENSION"
                               },
                               "number": {
                                 "type": "string",
@@ -1126,9 +1128,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "PHONE"
-                                ]
+                                "const": "PHONE"
                               },
                               "number": {
                                 "type": "string",
@@ -1194,82 +1194,94 @@
                         "additionalProperties": false
                       },
                       "transcription": {
-                        "type": "object",
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "AVAILABLE",
-                              "TOO_LONG",
-                              "PENDING",
-                              "DONE",
-                              "FAILED"
-                            ],
-                            "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
-                          },
-                          "text": {
-                            "type": "string",
-                            "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
-                          },
-                          "turns": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "speaker": {
-                                  "type": "string",
-                                  "enum": [
-                                    "SELLER",
-                                    "CUSTOMER"
-                                  ],
-                                  "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
-                                },
-                                "start": {
-                                  "type": "number",
-                                  "description": "Seconds from the start of the recording."
-                                },
-                                "text": {
-                                  "type": "string"
-                                }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "AVAILABLE",
+                                  "TOO_LONG",
+                                  "PENDING",
+                                  "DONE",
+                                  "FAILED"
+                                ],
+                                "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
                               },
-                              "required": [
-                                "speaker",
-                                "start",
-                                "text"
-                              ],
-                              "additionalProperties": false
+                              "text": {
+                                "type": "string",
+                                "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                              },
+                              "turns": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "speaker": {
+                                      "type": "string",
+                                      "enum": [
+                                        "SELLER",
+                                        "CUSTOMER"
+                                      ],
+                                      "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                    },
+                                    "start": {
+                                      "type": "number",
+                                      "description": "Seconds from the start of the recording."
+                                    },
+                                    "text": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "speaker",
+                                    "start",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                              }
                             },
-                            "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                            "required": [
+                              "status"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "status"
                         ],
-                        "additionalProperties": false,
-                        "nullable": true,
                         "description": "Null while there is no stored recording."
                       },
                       "analysis": {
-                        "type": "object",
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "PENDING",
-                              "DONE",
-                              "FAILED"
-                            ]
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "DONE",
+                                  "FAILED"
+                                ]
+                              },
+                              "summary": {
+                                "type": "string",
+                                "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ],
+                            "additionalProperties": false
                           },
-                          "summary": {
-                            "type": "string",
-                            "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "status"
                         ],
-                        "additionalProperties": false,
-                        "nullable": true,
                         "description": "The AI summary, written after each transcription; null before the first one."
                       },
                       "createdAt": {
@@ -1493,9 +1505,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "EXTENSION"
-                                ]
+                                "const": "EXTENSION"
                               },
                               "number": {
                                 "type": "string",
@@ -1518,9 +1528,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "PHONE"
-                                ]
+                                "const": "PHONE"
                               },
                               "number": {
                                 "type": "string",
@@ -1543,9 +1551,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "EXTENSION"
-                                ]
+                                "const": "EXTENSION"
                               },
                               "number": {
                                 "type": "string",
@@ -1568,9 +1574,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "PHONE"
-                                ]
+                                "const": "PHONE"
                               },
                               "number": {
                                 "type": "string",
@@ -1636,82 +1640,94 @@
                         "additionalProperties": false
                       },
                       "transcription": {
-                        "type": "object",
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "AVAILABLE",
-                              "TOO_LONG",
-                              "PENDING",
-                              "DONE",
-                              "FAILED"
-                            ],
-                            "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
-                          },
-                          "text": {
-                            "type": "string",
-                            "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
-                          },
-                          "turns": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "speaker": {
-                                  "type": "string",
-                                  "enum": [
-                                    "SELLER",
-                                    "CUSTOMER"
-                                  ],
-                                  "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
-                                },
-                                "start": {
-                                  "type": "number",
-                                  "description": "Seconds from the start of the recording."
-                                },
-                                "text": {
-                                  "type": "string"
-                                }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "AVAILABLE",
+                                  "TOO_LONG",
+                                  "PENDING",
+                                  "DONE",
+                                  "FAILED"
+                                ],
+                                "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
                               },
-                              "required": [
-                                "speaker",
-                                "start",
-                                "text"
-                              ],
-                              "additionalProperties": false
+                              "text": {
+                                "type": "string",
+                                "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                              },
+                              "turns": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "speaker": {
+                                      "type": "string",
+                                      "enum": [
+                                        "SELLER",
+                                        "CUSTOMER"
+                                      ],
+                                      "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                    },
+                                    "start": {
+                                      "type": "number",
+                                      "description": "Seconds from the start of the recording."
+                                    },
+                                    "text": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "speaker",
+                                    "start",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                              }
                             },
-                            "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                            "required": [
+                              "status"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "status"
                         ],
-                        "additionalProperties": false,
-                        "nullable": true,
                         "description": "Null while there is no stored recording."
                       },
                       "analysis": {
-                        "type": "object",
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "PENDING",
-                              "DONE",
-                              "FAILED"
-                            ]
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "DONE",
+                                  "FAILED"
+                                ]
+                              },
+                              "summary": {
+                                "type": "string",
+                                "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ],
+                            "additionalProperties": false
                           },
-                          "summary": {
-                            "type": "string",
-                            "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "status"
                         ],
-                        "additionalProperties": false,
-                        "nullable": true,
                         "description": "The AI summary, written after each transcription; null before the first one."
                       },
                       "createdAt": {
@@ -1999,9 +2015,15 @@
                             "type": "boolean"
                           },
                           "pipelineId": {
-                            "type": "string",
-                            "minLength": 1,
-                            "nullable": true
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "createdAt": {
                             "type": "string",
@@ -2012,8 +2034,10 @@
                             "minLength": 1
                           },
                           "channelName": {
-                            "type": "string",
-                            "nullable": true,
+                            "type": [
+                              "string",
+                              "null"
+                            ],
                             "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                           }
                         },
@@ -2228,9 +2252,15 @@
                       "type": "boolean"
                     },
                     "pipelineId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "nullable": true
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "createdAt": {
                       "type": "string",
@@ -2241,8 +2271,10 @@
                       "minLength": 1
                     },
                     "channelName": {
-                      "type": "string",
-                      "nullable": true,
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "description": "The name the channel gave the lead (such as their WhatsApp profile name), or null. `profile.name` shows the contact's name when the chat has a contact."
                     }
                   },
@@ -4181,9 +4213,15 @@
                 "type": "object",
                 "properties": {
                   "contactId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "nullable": true
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
                   "responsibleId": {
                     "type": "string",
@@ -4224,9 +4262,15 @@
                     "minLength": 1
                   },
                   "lossReasonId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "nullable": true
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -4996,9 +5040,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "TEXT"
-                                ]
+                                "const": "TEXT"
                               },
                               "config": {
                                 "type": "object",
@@ -5079,9 +5121,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "NUMBER"
-                                ]
+                                "const": "NUMBER"
                               },
                               "config": {
                                 "type": "object",
@@ -5169,9 +5209,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "DATE"
-                                ]
+                                "const": "DATE"
                               },
                               "config": {
                                 "type": "object",
@@ -5252,9 +5290,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "DATETIME"
-                                ]
+                                "const": "DATETIME"
                               },
                               "config": {
                                 "type": "object",
@@ -5335,9 +5371,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "BOOLEAN"
-                                ]
+                                "const": "BOOLEAN"
                               },
                               "config": {
                                 "type": "object",
@@ -5418,9 +5452,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "OPTIONS"
-                                ]
+                                "const": "OPTIONS"
                               },
                               "config": {
                                 "type": "object",
@@ -5512,9 +5544,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "MULTISELECT"
-                                ]
+                                "const": "MULTISELECT"
                               },
                               "config": {
                                 "type": "object",
@@ -5606,9 +5636,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "PHONE"
-                                ]
+                                "const": "PHONE"
                               },
                               "config": {
                                 "type": "object",
@@ -5689,9 +5717,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "EMAIL"
-                                ]
+                                "const": "EMAIL"
                               },
                               "config": {
                                 "type": "object",
@@ -5772,9 +5798,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CPF"
-                                ]
+                                "const": "CPF"
                               },
                               "config": {
                                 "type": "object",
@@ -5859,9 +5883,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CNPJ"
-                                ]
+                                "const": "CNPJ"
                               },
                               "config": {
                                 "type": "object",
@@ -5946,9 +5968,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CPF_CNPJ"
-                                ]
+                                "const": "CPF_CNPJ"
                               },
                               "config": {
                                 "type": "object",
@@ -6033,9 +6053,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CEP"
-                                ]
+                                "const": "CEP"
                               },
                               "config": {
                                 "type": "object",
@@ -6116,9 +6134,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CURRENCY"
-                                ]
+                                "const": "CURRENCY"
                               },
                               "config": {
                                 "type": "object",
@@ -6214,9 +6230,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "TIME"
-                                ]
+                                "const": "TIME"
                               },
                               "config": {
                                 "type": "object",
@@ -6306,9 +6320,7 @@
                               },
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "LINK"
-                                ]
+                                "const": "LINK"
                               },
                               "config": {
                                 "type": "object",
@@ -6470,9 +6482,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "TEXT"
-                          ]
+                          "const": "TEXT"
                         },
                         "config": {
                           "type": "object",
@@ -6553,9 +6563,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "NUMBER"
-                          ]
+                          "const": "NUMBER"
                         },
                         "config": {
                           "type": "object",
@@ -6643,9 +6651,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "DATE"
-                          ]
+                          "const": "DATE"
                         },
                         "config": {
                           "type": "object",
@@ -6726,9 +6732,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "DATETIME"
-                          ]
+                          "const": "DATETIME"
                         },
                         "config": {
                           "type": "object",
@@ -6809,9 +6813,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "BOOLEAN"
-                          ]
+                          "const": "BOOLEAN"
                         },
                         "config": {
                           "type": "object",
@@ -6892,9 +6894,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "OPTIONS"
-                          ]
+                          "const": "OPTIONS"
                         },
                         "config": {
                           "type": "object",
@@ -6986,9 +6986,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "MULTISELECT"
-                          ]
+                          "const": "MULTISELECT"
                         },
                         "config": {
                           "type": "object",
@@ -7080,9 +7078,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "PHONE"
-                          ]
+                          "const": "PHONE"
                         },
                         "config": {
                           "type": "object",
@@ -7163,9 +7159,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "EMAIL"
-                          ]
+                          "const": "EMAIL"
                         },
                         "config": {
                           "type": "object",
@@ -7246,9 +7240,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CPF"
-                          ]
+                          "const": "CPF"
                         },
                         "config": {
                           "type": "object",
@@ -7333,9 +7325,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CNPJ"
-                          ]
+                          "const": "CNPJ"
                         },
                         "config": {
                           "type": "object",
@@ -7420,9 +7410,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CPF_CNPJ"
-                          ]
+                          "const": "CPF_CNPJ"
                         },
                         "config": {
                           "type": "object",
@@ -7507,9 +7495,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CEP"
-                          ]
+                          "const": "CEP"
                         },
                         "config": {
                           "type": "object",
@@ -7590,9 +7576,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CURRENCY"
-                          ]
+                          "const": "CURRENCY"
                         },
                         "config": {
                           "type": "object",
@@ -7688,9 +7672,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "TIME"
-                          ]
+                          "const": "TIME"
                         },
                         "config": {
                           "type": "object",
@@ -7780,9 +7762,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "LINK"
-                          ]
+                          "const": "LINK"
                         },
                         "config": {
                           "type": "object",
@@ -7905,9 +7885,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "TEXT"
-                        ]
+                        "const": "TEXT"
                       },
                       "config": {
                         "type": "object",
@@ -7953,9 +7931,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "NUMBER"
-                        ]
+                        "const": "NUMBER"
                       },
                       "config": {
                         "type": "object",
@@ -8008,9 +7984,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "DATE"
-                        ]
+                        "const": "DATE"
                       },
                       "config": {
                         "type": "object",
@@ -8056,9 +8030,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "DATETIME"
-                        ]
+                        "const": "DATETIME"
                       },
                       "config": {
                         "type": "object",
@@ -8104,9 +8076,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "BOOLEAN"
-                        ]
+                        "const": "BOOLEAN"
                       },
                       "config": {
                         "type": "object",
@@ -8152,9 +8122,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "OPTIONS"
-                        ]
+                        "const": "OPTIONS"
                       },
                       "config": {
                         "type": "object",
@@ -8211,9 +8179,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "MULTISELECT"
-                        ]
+                        "const": "MULTISELECT"
                       },
                       "config": {
                         "type": "object",
@@ -8270,9 +8236,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "PHONE"
-                        ]
+                        "const": "PHONE"
                       },
                       "config": {
                         "type": "object",
@@ -8318,9 +8282,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "EMAIL"
-                        ]
+                        "const": "EMAIL"
                       },
                       "config": {
                         "type": "object",
@@ -8366,9 +8328,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CPF"
-                        ]
+                        "const": "CPF"
                       },
                       "config": {
                         "type": "object",
@@ -8418,9 +8378,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CNPJ"
-                        ]
+                        "const": "CNPJ"
                       },
                       "config": {
                         "type": "object",
@@ -8470,9 +8428,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CPF_CNPJ"
-                        ]
+                        "const": "CPF_CNPJ"
                       },
                       "config": {
                         "type": "object",
@@ -8522,9 +8478,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CEP"
-                        ]
+                        "const": "CEP"
                       },
                       "config": {
                         "type": "object",
@@ -8570,9 +8524,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CURRENCY"
-                        ]
+                        "const": "CURRENCY"
                       },
                       "config": {
                         "type": "object",
@@ -8633,9 +8585,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "TIME"
-                        ]
+                        "const": "TIME"
                       },
                       "config": {
                         "type": "object",
@@ -8690,9 +8640,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "LINK"
-                        ]
+                        "const": "LINK"
                       },
                       "config": {
                         "type": "object",
@@ -8779,9 +8727,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "TEXT"
-                          ]
+                          "const": "TEXT"
                         },
                         "config": {
                           "type": "object",
@@ -8862,9 +8808,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "NUMBER"
-                          ]
+                          "const": "NUMBER"
                         },
                         "config": {
                           "type": "object",
@@ -8952,9 +8896,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "DATE"
-                          ]
+                          "const": "DATE"
                         },
                         "config": {
                           "type": "object",
@@ -9035,9 +8977,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "DATETIME"
-                          ]
+                          "const": "DATETIME"
                         },
                         "config": {
                           "type": "object",
@@ -9118,9 +9058,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "BOOLEAN"
-                          ]
+                          "const": "BOOLEAN"
                         },
                         "config": {
                           "type": "object",
@@ -9201,9 +9139,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "OPTIONS"
-                          ]
+                          "const": "OPTIONS"
                         },
                         "config": {
                           "type": "object",
@@ -9295,9 +9231,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "MULTISELECT"
-                          ]
+                          "const": "MULTISELECT"
                         },
                         "config": {
                           "type": "object",
@@ -9389,9 +9323,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "PHONE"
-                          ]
+                          "const": "PHONE"
                         },
                         "config": {
                           "type": "object",
@@ -9472,9 +9404,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "EMAIL"
-                          ]
+                          "const": "EMAIL"
                         },
                         "config": {
                           "type": "object",
@@ -9555,9 +9485,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CPF"
-                          ]
+                          "const": "CPF"
                         },
                         "config": {
                           "type": "object",
@@ -9642,9 +9570,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CNPJ"
-                          ]
+                          "const": "CNPJ"
                         },
                         "config": {
                           "type": "object",
@@ -9729,9 +9655,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CPF_CNPJ"
-                          ]
+                          "const": "CPF_CNPJ"
                         },
                         "config": {
                           "type": "object",
@@ -9816,9 +9740,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CEP"
-                          ]
+                          "const": "CEP"
                         },
                         "config": {
                           "type": "object",
@@ -9899,9 +9821,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "CURRENCY"
-                          ]
+                          "const": "CURRENCY"
                         },
                         "config": {
                           "type": "object",
@@ -9997,9 +9917,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "TIME"
-                          ]
+                          "const": "TIME"
                         },
                         "config": {
                           "type": "object",
@@ -10089,9 +10007,7 @@
                         },
                         "type": {
                           "type": "string",
-                          "enum": [
-                            "LINK"
-                          ]
+                          "const": "LINK"
                         },
                         "config": {
                           "type": "object",
@@ -10260,9 +10176,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "TEXT"
-                        ]
+                        "const": "TEXT"
                       },
                       "label": {
                         "type": "string",
@@ -10300,9 +10214,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "NUMBER"
-                        ]
+                        "const": "NUMBER"
                       },
                       "label": {
                         "type": "string",
@@ -10347,9 +10259,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "DATE"
-                        ]
+                        "const": "DATE"
                       },
                       "label": {
                         "type": "string",
@@ -10387,9 +10297,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "DATETIME"
-                        ]
+                        "const": "DATETIME"
                       },
                       "label": {
                         "type": "string",
@@ -10427,9 +10335,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "BOOLEAN"
-                        ]
+                        "const": "BOOLEAN"
                       },
                       "label": {
                         "type": "string",
@@ -10467,9 +10373,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "OPTIONS"
-                        ]
+                        "const": "OPTIONS"
                       },
                       "label": {
                         "type": "string",
@@ -10517,9 +10421,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "MULTISELECT"
-                        ]
+                        "const": "MULTISELECT"
                       },
                       "label": {
                         "type": "string",
@@ -10567,9 +10469,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "PHONE"
-                        ]
+                        "const": "PHONE"
                       },
                       "label": {
                         "type": "string",
@@ -10607,9 +10507,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "EMAIL"
-                        ]
+                        "const": "EMAIL"
                       },
                       "label": {
                         "type": "string",
@@ -10647,9 +10545,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CPF"
-                        ]
+                        "const": "CPF"
                       },
                       "label": {
                         "type": "string",
@@ -10691,9 +10587,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CNPJ"
-                        ]
+                        "const": "CNPJ"
                       },
                       "label": {
                         "type": "string",
@@ -10735,9 +10629,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CPF_CNPJ"
-                        ]
+                        "const": "CPF_CNPJ"
                       },
                       "label": {
                         "type": "string",
@@ -10779,9 +10671,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CEP"
-                        ]
+                        "const": "CEP"
                       },
                       "label": {
                         "type": "string",
@@ -10819,9 +10709,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "CURRENCY"
-                        ]
+                        "const": "CURRENCY"
                       },
                       "label": {
                         "type": "string",
@@ -10874,9 +10762,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "TIME"
-                        ]
+                        "const": "TIME"
                       },
                       "label": {
                         "type": "string",
@@ -10923,9 +10809,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "LINK"
-                        ]
+                        "const": "LINK"
                       },
                       "label": {
                         "type": "string",
@@ -12048,9 +11932,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "TEXT"
-                                    ]
+                                    "const": "TEXT"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12077,9 +11959,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "IMAGE"
-                                    ]
+                                    "const": "IMAGE"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12126,9 +12006,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "VIDEO"
-                                    ]
+                                    "const": "VIDEO"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12179,9 +12057,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "AUDIO"
-                                    ]
+                                    "const": "AUDIO"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12229,9 +12105,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "DOCUMENT"
-                                    ]
+                                    "const": "DOCUMENT"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12281,9 +12155,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "STICKER"
-                                    ]
+                                    "const": "STICKER"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12334,9 +12206,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "CONTACT"
-                                    ]
+                                    "const": "CONTACT"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12382,9 +12252,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "LOCATION"
-                                    ]
+                                    "const": "LOCATION"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12420,9 +12288,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "REACTION"
-                                    ]
+                                    "const": "REACTION"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12448,9 +12314,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "TEMPLATE"
-                                    ]
+                                    "const": "TEMPLATE"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12498,9 +12362,7 @@
                                 "properties": {
                                   "type": {
                                     "type": "string",
-                                    "enum": [
-                                      "URL"
-                                    ]
+                                    "const": "URL"
                                   },
                                   "content": {
                                     "type": "object",
@@ -12745,9 +12607,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "TEXT"
-                            ]
+                            "const": "TEXT"
                           },
                           "content": {
                             "type": "object",
@@ -12774,9 +12634,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "IMAGE"
-                            ]
+                            "const": "IMAGE"
                           },
                           "content": {
                             "type": "object",
@@ -12823,9 +12681,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "VIDEO"
-                            ]
+                            "const": "VIDEO"
                           },
                           "content": {
                             "type": "object",
@@ -12876,9 +12732,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "AUDIO"
-                            ]
+                            "const": "AUDIO"
                           },
                           "content": {
                             "type": "object",
@@ -12926,9 +12780,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "DOCUMENT"
-                            ]
+                            "const": "DOCUMENT"
                           },
                           "content": {
                             "type": "object",
@@ -12978,9 +12830,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "STICKER"
-                            ]
+                            "const": "STICKER"
                           },
                           "content": {
                             "type": "object",
@@ -13031,9 +12881,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "CONTACT"
-                            ]
+                            "const": "CONTACT"
                           },
                           "content": {
                             "type": "object",
@@ -13079,9 +12927,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "LOCATION"
-                            ]
+                            "const": "LOCATION"
                           },
                           "content": {
                             "type": "object",
@@ -13117,9 +12963,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "REACTION"
-                            ]
+                            "const": "REACTION"
                           },
                           "content": {
                             "type": "object",
@@ -13145,9 +12989,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "TEMPLATE"
-                            ]
+                            "const": "TEMPLATE"
                           },
                           "content": {
                             "type": "object",
@@ -13195,9 +13037,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "enum": [
-                              "URL"
-                            ]
+                            "const": "URL"
                           },
                           "content": {
                             "type": "object",
@@ -13393,9 +13233,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "TEXT"
-                              ]
+                              "const": "TEXT"
                             },
                             "content": {
                               "type": "object",
@@ -13422,9 +13260,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "IMAGE"
-                              ]
+                              "const": "IMAGE"
                             },
                             "content": {
                               "type": "object",
@@ -13471,9 +13307,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "VIDEO"
-                              ]
+                              "const": "VIDEO"
                             },
                             "content": {
                               "type": "object",
@@ -13524,9 +13358,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "AUDIO"
-                              ]
+                              "const": "AUDIO"
                             },
                             "content": {
                               "type": "object",
@@ -13574,9 +13406,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "DOCUMENT"
-                              ]
+                              "const": "DOCUMENT"
                             },
                             "content": {
                               "type": "object",
@@ -13626,9 +13456,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "STICKER"
-                              ]
+                              "const": "STICKER"
                             },
                             "content": {
                               "type": "object",
@@ -13679,9 +13507,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "CONTACT"
-                              ]
+                              "const": "CONTACT"
                             },
                             "content": {
                               "type": "object",
@@ -13727,9 +13553,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "LOCATION"
-                              ]
+                              "const": "LOCATION"
                             },
                             "content": {
                               "type": "object",
@@ -13765,9 +13589,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "REACTION"
-                              ]
+                              "const": "REACTION"
                             },
                             "content": {
                               "type": "object",
@@ -13793,9 +13615,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "TEMPLATE"
-                              ]
+                              "const": "TEMPLATE"
                             },
                             "content": {
                               "type": "object",
@@ -13843,9 +13663,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "URL"
-                              ]
+                              "const": "URL"
                             },
                             "content": {
                               "type": "object",
@@ -14111,9 +13929,7 @@
                       },
                       "method": {
                         "type": "string",
-                        "enum": [
-                          "MESSAGES"
-                        ]
+                        "const": "MESSAGES"
                       },
                       "messages": {
                         "type": "array",
@@ -14130,9 +13946,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "TEXT"
-                                      ]
+                                      "const": "TEXT"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14159,9 +13973,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "IMAGE"
-                                      ]
+                                      "const": "IMAGE"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14208,9 +14020,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "VIDEO"
-                                      ]
+                                      "const": "VIDEO"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14261,9 +14071,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "AUDIO"
-                                      ]
+                                      "const": "AUDIO"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14311,9 +14119,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "DOCUMENT"
-                                      ]
+                                      "const": "DOCUMENT"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14363,9 +14169,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "STICKER"
-                                      ]
+                                      "const": "STICKER"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14416,9 +14220,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "CONTACT"
-                                      ]
+                                      "const": "CONTACT"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14464,9 +14266,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "LOCATION"
-                                      ]
+                                      "const": "LOCATION"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14502,9 +14302,7 @@
                                   "properties": {
                                     "type": {
                                       "type": "string",
-                                      "enum": [
-                                        "URL"
-                                      ]
+                                      "const": "URL"
                                     },
                                     "content": {
                                       "type": "object",
@@ -14568,9 +14366,7 @@
                       },
                       "method": {
                         "type": "string",
-                        "enum": [
-                          "AI"
-                        ]
+                        "const": "AI"
                       }
                     },
                     "required": [
@@ -14603,9 +14399,7 @@
                       },
                       "method": {
                         "type": "string",
-                        "enum": [
-                          "TEMPLATE"
-                        ]
+                        "const": "TEMPLATE"
                       },
                       "templateId": {
                         "type": "string",
@@ -14664,9 +14458,7 @@
                       },
                       "method": {
                         "type": "string",
-                        "enum": [
-                          "MESSAGE"
-                        ]
+                        "const": "MESSAGE"
                       },
                       "message": {
                         "anyOf": [
@@ -14675,9 +14467,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "TEXT"
-                                ]
+                                "const": "TEXT"
                               },
                               "content": {
                                 "type": "object",
@@ -14704,9 +14494,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "IMAGE"
-                                ]
+                                "const": "IMAGE"
                               },
                               "content": {
                                 "type": "object",
@@ -14753,9 +14541,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "VIDEO"
-                                ]
+                                "const": "VIDEO"
                               },
                               "content": {
                                 "type": "object",
@@ -14806,9 +14592,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "AUDIO"
-                                ]
+                                "const": "AUDIO"
                               },
                               "content": {
                                 "type": "object",
@@ -14856,9 +14640,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "DOCUMENT"
-                                ]
+                                "const": "DOCUMENT"
                               },
                               "content": {
                                 "type": "object",
@@ -14908,9 +14690,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "STICKER"
-                                ]
+                                "const": "STICKER"
                               },
                               "content": {
                                 "type": "object",
@@ -14961,9 +14741,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "CONTACT"
-                                ]
+                                "const": "CONTACT"
                               },
                               "content": {
                                 "type": "object",
@@ -15009,9 +14787,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "LOCATION"
-                                ]
+                                "const": "LOCATION"
                               },
                               "content": {
                                 "type": "object",
@@ -15047,9 +14823,7 @@
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "enum": [
-                                  "URL"
-                                ]
+                                "const": "URL"
                               },
                               "content": {
                                 "type": "object",
@@ -16873,9 +16647,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16884,9 +16664,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16895,9 +16681,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16906,9 +16698,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16917,9 +16715,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16928,9 +16732,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16939,9 +16749,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -16950,9 +16766,15 @@
                                     "type": "object",
                                     "properties": {
                                       "customFieldId": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "nullable": true
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "additionalProperties": false
@@ -17156,9 +16978,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17167,9 +16995,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17178,9 +17012,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17189,9 +17029,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17200,9 +17046,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17211,9 +17063,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17222,9 +17080,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17233,9 +17097,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17378,9 +17248,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17389,9 +17265,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17400,9 +17282,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17411,9 +17299,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17422,9 +17316,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17433,9 +17333,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17444,9 +17350,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17455,9 +17367,15 @@
                             "type": "object",
                             "properties": {
                               "customFieldId": {
-                                "type": "string",
-                                "minLength": 1,
-                                "nullable": true
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -17636,9 +17554,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17647,9 +17571,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17658,9 +17588,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17669,9 +17605,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17680,9 +17622,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17691,9 +17639,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17702,9 +17656,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -17713,9 +17673,15 @@
                               "type": "object",
                               "properties": {
                                 "customFieldId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "nullable": true
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "additionalProperties": false
@@ -19282,95 +19248,12 @@
                             "description": "The workflow run that created the task, when an automation did; `createdBy` names users only."
                           },
                           "deal": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "createdAt": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "updatedAt": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "projectId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "contactId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "fields": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "fieldId": {
-                                      "type": "string",
-                                      "minLength": 1
-                                    },
-                                    "value": {}
-                                  },
-                                  "required": [
-                                    "fieldId"
-                                  ],
-                                  "additionalProperties": false,
-                                  "description": "Custom field value for this entity"
-                                }
-                              },
-                              "agentId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "tagIds": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "isTest": {
-                                "type": "boolean"
-                              },
-                              "responsibleId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "pipelineId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "stageId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "lossReasonId": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "stageEnteredAt": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "closedAt": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "lastLeadMessageAt": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "contact": {
+                            "anyOf": [
+                              {
                                 "type": "object",
                                 "properties": {
                                   "id": {
                                     "type": "string"
-                                  },
-                                  "archivedAt": {
-                                    "type": "string",
-                                    "format": "date-time"
                                   },
                                   "createdAt": {
                                     "type": "string",
@@ -19380,11 +19263,11 @@
                                     "type": "string",
                                     "format": "date-time"
                                   },
-                                  "avatar": {
+                                  "projectId": {
                                     "type": "string",
                                     "minLength": 1
                                   },
-                                  "projectId": {
+                                  "contactId": {
                                     "type": "string",
                                     "minLength": 1
                                   },
@@ -19402,81 +19285,170 @@
                                       "required": [
                                         "fieldId"
                                       ],
-                                      "additionalProperties": false
+                                      "additionalProperties": false,
+                                      "description": "Custom field value for this entity"
+                                    }
+                                  },
+                                  "agentId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "tagIds": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
                                     }
                                   },
                                   "isTest": {
                                     "type": "boolean"
+                                  },
+                                  "responsibleId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "pipelineId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "stageId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "lossReasonId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "stageEnteredAt": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  },
+                                  "closedAt": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  },
+                                  "lastLeadMessageAt": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  },
+                                  "contact": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "archivedAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      },
+                                      "createdAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      },
+                                      "avatar": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "projectId": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "fields": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "fieldId": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "value": {}
+                                          },
+                                          "required": [
+                                            "fieldId"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      },
+                                      "isTest": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "createdAt",
+                                      "updatedAt",
+                                      "projectId"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "chat": {
+                                    "type": "object",
+                                    "properties": {
+                                      "unreadMessagesCount": {
+                                        "type": "number"
+                                      },
+                                      "lastMessage": {
+                                        "type": "object",
+                                        "additionalProperties": {}
+                                      },
+                                      "lastLeadMessageTimestamp": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      },
+                                      "unreadByChatId": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                          "type": "number"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "unreadMessagesCount",
+                                      "unreadByChatId"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "nextTask": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "title": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "dueAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "title",
+                                      "dueAt"
+                                    ],
+                                    "additionalProperties": false
                                   }
                                 },
                                 "required": [
                                   "id",
                                   "createdAt",
                                   "updatedAt",
-                                  "projectId"
+                                  "projectId",
+                                  "responsibleId"
                                 ],
                                 "additionalProperties": false
                               },
-                              "chat": {
-                                "type": "object",
-                                "properties": {
-                                  "unreadMessagesCount": {
-                                    "type": "number"
-                                  },
-                                  "lastMessage": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                  },
-                                  "lastLeadMessageTimestamp": {
-                                    "type": "string",
-                                    "format": "date-time"
-                                  },
-                                  "unreadByChatId": {
-                                    "type": "object",
-                                    "additionalProperties": {
-                                      "type": "number"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "unreadMessagesCount",
-                                  "unreadByChatId"
-                                ],
-                                "additionalProperties": false
-                              },
-                              "nextTask": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string",
-                                    "minLength": 1
-                                  },
-                                  "title": {
-                                    "type": "string",
-                                    "minLength": 1
-                                  },
-                                  "dueAt": {
-                                    "type": "string",
-                                    "format": "date-time"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "title",
-                                  "dueAt"
-                                ],
-                                "additionalProperties": false
+                              {
+                                "type": "null"
                               }
-                            },
-                            "required": [
-                              "id",
-                              "createdAt",
-                              "updatedAt",
-                              "projectId",
-                              "responsibleId"
-                            ],
-                            "additionalProperties": false,
-                            "nullable": true
+                            ]
                           }
                         },
                         "required": [
@@ -20274,9 +20246,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -20299,9 +20269,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -20324,9 +20292,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "EXTENSION"
-                              ]
+                              "const": "EXTENSION"
                             },
                             "number": {
                               "type": "string",
@@ -20349,9 +20315,7 @@
                           "properties": {
                             "type": {
                               "type": "string",
-                              "enum": [
-                                "PHONE"
-                              ]
+                              "const": "PHONE"
                             },
                             "number": {
                               "type": "string",
@@ -20417,82 +20381,94 @@
                       "additionalProperties": false
                     },
                     "transcription": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "AVAILABLE",
-                            "TOO_LONG",
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ],
-                          "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
-                        },
-                        "text": {
-                          "type": "string",
-                          "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
-                        },
-                        "turns": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "speaker": {
-                                "type": "string",
-                                "enum": [
-                                  "SELLER",
-                                  "CUSTOMER"
-                                ],
-                                "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
-                              },
-                              "start": {
-                                "type": "number",
-                                "description": "Seconds from the start of the recording."
-                              },
-                              "text": {
-                                "type": "string"
-                              }
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "AVAILABLE",
+                                "TOO_LONG",
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ],
+                              "description": "`AVAILABLE`: can be requested. `TOO_LONG`: the recording is over the transcription limit. `PENDING`, `DONE` or `FAILED` once requested."
                             },
-                            "required": [
-                              "speaker",
-                              "start",
-                              "text"
-                            ],
-                            "additionalProperties": false
+                            "text": {
+                              "type": "string",
+                              "description": "The whole transcript in one block, when the call was not split by speaker. Absent when `turns` is present."
+                            },
+                            "turns": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "speaker": {
+                                    "type": "string",
+                                    "enum": [
+                                      "SELLER",
+                                      "CUSTOMER"
+                                    ],
+                                    "description": "`SELLER` is the extension side, `CUSTOMER` the phone side."
+                                  },
+                                  "start": {
+                                    "type": "number",
+                                    "description": "Seconds from the start of the recording."
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "speaker",
+                                  "start",
+                                  "text"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                            }
                           },
-                          "description": "Who said what, in order. Present when each side of the call was transcribed from its own channel of the recording."
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "Null while there is no stored recording."
                     },
                     "analysis": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING",
-                            "DONE",
-                            "FAILED"
-                          ]
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "DONE",
+                                "FAILED"
+                              ]
+                            },
+                            "summary": {
+                              "type": "string",
+                              "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                            }
+                          },
+                          "required": [
+                            "status"
+                          ],
+                          "additionalProperties": false
                         },
-                        "summary": {
-                          "type": "string",
-                          "description": "Absent when the call had nothing worth summing up, such as a voicemail."
+                        {
+                          "type": "null"
                         }
-                      },
-                      "required": [
-                        "status"
                       ],
-                      "additionalProperties": false,
-                      "nullable": true,
                       "description": "The AI summary, written after each transcription; null before the first one."
                     },
                     "createdAt": {
