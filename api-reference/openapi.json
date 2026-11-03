@@ -13817,6 +13817,16 @@
               }
             }
           },
+          "403": {
+            "description": "Not allowed for this credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Resource not found",
             "content": {
@@ -13826,9 +13836,19 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "The payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
-        "description": "The message is deleted. Answers 204 with no body."
+        "description": "Deletes the message; the deletion is queued. A message sent from the platform (by a user, the AI agent or an automation) is also revoked for the contact, which is only possible up to 10 minutes after it was sent: past that, answers 422 `DELETE_WINDOW_CLOSED`. A lead's message, or one the salesperson sent from the phone, is only hidden here, however old. Answers 204 with no body."
       }
     },
     "/v1/messages/send-by-phone": {
