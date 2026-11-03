@@ -4473,6 +4473,244 @@
         "description": "Detaches the tag from the deal. Answers 204 with no body."
       }
     },
+    "/v1/deals/{dealId}/conversions": {
+      "post": {
+        "tags": [
+          "Deals"
+        ],
+        "summary": "Send a conversion to an ad platform",
+        "operationId": "postDealsByDealIdConversions",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dealId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "QUEUED"
+                        },
+                        "conversionId": {
+                          "type": "string"
+                        },
+                        "eventName": {
+                          "type": "string",
+                          "description": "The name the platform will receive."
+                        },
+                        "scheduledFor": {
+                          "type": "string",
+                          "description": "Google Ads: when the send goes out, ISO 8601, set when the click is too recent for Google to take it yet."
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "conversionId",
+                        "eventName"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "SKIPPED"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "NO_IDENTIFIER",
+                            "UNSUPPORTED_EVENT",
+                            "DUPLICATE",
+                            "NOT_CONFIGURED",
+                            "MISSING_VALUE"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "reason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "SKIPPED",
+                  "reason": "MISSING_VALUE"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "QUEUED"
+                        },
+                        "conversionId": {
+                          "type": "string"
+                        },
+                        "eventName": {
+                          "type": "string",
+                          "description": "The name the platform will receive."
+                        },
+                        "scheduledFor": {
+                          "type": "string",
+                          "description": "Google Ads: when the send goes out, ISO 8601, set when the click is too recent for Google to take it yet."
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "conversionId",
+                        "eventName"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "SKIPPED"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "NO_IDENTIFIER",
+                            "UNSUPPORTED_EVENT",
+                            "DUPLICATE",
+                            "NOT_CONFIGURED",
+                            "MISSING_VALUE"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "reason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "example": {
+                  "status": "QUEUED",
+                  "conversionId": "3f2b9c1e-6a7d-4e1f-9b52-0c8d4a7e5f21",
+                  "eventName": "Purchase"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Builds the deal's conversion for the chosen platform: the value comes from the deal price, contact data from its contact, and the click from the deal's touches (a click-to-WhatsApp ad, a gclid or fbclid on the URL the lead came through) or its chatbot session; a deal from a Meta lead form also sends its lead id. On Meta a CRM or site event goes to the pixel `pixelId` names, through the project's Meta Ads connection, and an ad conversation's event to the dataset of its WhatsApp account; with no pixel named, only the ad conversation's event goes, through the WhatsApp Business channel, and anything else is skipped (NOT_CONFIGURED, or UNSUPPORTED_EVENT for a lead from an ad). On Google Ads it goes through the project's Google Ads connection, to the conversion action `event` names, no sooner than 6 hours after the click it credits (`scheduledFor`), when Google takes it. Delivery is queued: answers 202 with the conversion id. When there is nothing to send it answers 200 with `status: SKIPPED` and the reason, e.g. a Purchase on a deal without price, or the same event already sent for this deal. For a lead from a click-to-WhatsApp ad, an event Meta's messaging list lacks goes out as a CRM event: a custom one always, a site's standard one unless `messagingFallback` is SKIP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "META",
+                      "GOOGLE_ADS"
+                    ],
+                    "description": "The ad platform that receives the conversion."
+                  },
+                  "event": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "The platform's standard name or any custom name. Meta's standard names (Lead, Contact, Schedule, Purchase, QualifiedLead…) are matched case-insensitively and sent the way the lead's origin expects: Lead goes out as LeadSubmitted for leads from a click-to-WhatsApp ad. Those leads only take Meta's business messaging names: a site's standard name follows `messagingFallback`, and a custom name goes out as a CRM event. Purchase takes its value from the deal price. On Google Ads it is the id of a conversion action of the project's account, of the import-from-clicks kind (GET /connections/google-ads/conversion-actions lists them), and any conversion takes the deal price as its value."
+                  },
+                  "pixelId": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Meta: the pixel (dataset) a CRM or site event goes to, one the project's Meta Ads connection was granted (GET /connections/meta-ads/pixels lists them). An event of a click-to-WhatsApp ad conversation goes to the dataset of its WhatsApp account instead. Without it, only those go out, through the WhatsApp Business channel."
+                  },
+                  "messagingFallback": {
+                    "type": "string",
+                    "enum": [
+                      "CRM",
+                      "SKIP"
+                    ],
+                    "description": "For a lead from a click-to-WhatsApp ad, what to do with a site's standard event, which Meta's business messaging does not take (Schedule, Contact…). CRM, the default, sends it as a CRM event, matched by phone, email and cookies but no longer tied to the ad click. SKIP sends nothing and answers SKIPPED with UNSUPPORTED_EVENT. A custom name always goes out as a CRM event. Meta only."
+                  },
+                  "testEventCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Meta: the code from the Test Events tab in Meta Events Manager; test events still count as real data in Meta. Google Ads: any value has Google only validate the conversion, which it does not record."
+                  }
+                },
+                "required": [
+                  "provider",
+                  "event"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/field-groups": {
       "get": {
         "tags": [
