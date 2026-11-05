@@ -13317,6 +13317,1334 @@
         }
       }
     },
+    "/v1/contacts/{contactId}/messages": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "List the messages of every chat of a contact",
+        "operationId": "getContactsByContactIdMessages",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "[limit]",
+            "in": "query",
+            "required": false,
+            "description": "How many records to return, at most 250.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 250
+            }
+          },
+          {
+            "name": "[offset]",
+            "in": "query",
+            "required": false,
+            "description": "How many records to skip.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "[with]",
+            "in": "query",
+            "required": false,
+            "description": "`tests` also reads the contact's test chats.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "sender": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "On a SYSTEM sender: the workflow run that sent it, when an automation did."
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "SENT",
+                              "RECEIVED",
+                              "READ",
+                              "PLAYED",
+                              "FAILED"
+                            ]
+                          },
+                          "content": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "TEXT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "selectedButton": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      }
+                                    },
+                                    "required": [
+                                      "text"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "IMAGE"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "VIDEO"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "isAnimated": {
+                                            "type": "boolean",
+                                            "default": false
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "AUDIO"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          }
+                                        },
+                                        "required": [
+                                          "url",
+                                          "fileId"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "DOCUMENT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "filename": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "STICKER"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "isAnimated": {
+                                            "type": "boolean",
+                                            "default": false
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "CONTACT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "phones": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "emails": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "format": "email"
+                                        }
+                                      },
+                                      "urls": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "format": "uri"
+                                        }
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "LOCATION"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "latitude": {
+                                        "type": "number"
+                                      },
+                                      "longitude": {
+                                        "type": "number"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "address": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "latitude",
+                                      "longitude"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "REACTION"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "TEMPLATE"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "templateId": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "variables": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "name": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "value"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "templateId"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "URL"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "showPreview": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "text"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "readBy": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "at"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "deletedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "editedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "repliedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "forwardedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "error": {
+                            "type": "string",
+                            "description": "A FAILED message's error, as the provider or the API gave it."
+                          },
+                          "chatId": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "sender",
+                          "timestamp",
+                          "status",
+                          "chatId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "reactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "sender": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "automation": {
+                                "type": "object",
+                                "properties": {
+                                  "workflowId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "executionId": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "workflowId",
+                                  "executionId"
+                                ],
+                                "additionalProperties": false,
+                                "description": "On a SYSTEM sender: the workflow run that sent it, when an automation did."
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "SENT",
+                              "RECEIVED",
+                              "READ",
+                              "PLAYED",
+                              "FAILED"
+                            ]
+                          },
+                          "content": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "TEXT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "selectedButton": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      }
+                                    },
+                                    "required": [
+                                      "text"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "IMAGE"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "VIDEO"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "isAnimated": {
+                                            "type": "boolean",
+                                            "default": false
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "AUDIO"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          }
+                                        },
+                                        "required": [
+                                          "url",
+                                          "fileId"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "DOCUMENT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "filename": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "STICKER"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "media": {
+                                        "type": "object",
+                                        "properties": {
+                                          "url": {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          "mimeType": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "fileId": {
+                                            "type": "string",
+                                            "minLength": 1
+                                          },
+                                          "isAnimated": {
+                                            "type": "boolean",
+                                            "default": false
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ],
+                                        "additionalProperties": false
+                                      }
+                                    },
+                                    "required": [
+                                      "media"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "CONTACT"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "phones": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "emails": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "format": "email"
+                                        }
+                                      },
+                                      "urls": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "format": "uri"
+                                        }
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "LOCATION"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "latitude": {
+                                        "type": "number"
+                                      },
+                                      "longitude": {
+                                        "type": "number"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "address": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "latitude",
+                                      "longitude"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "REACTION"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "TEMPLATE"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "templateId": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "variables": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "name": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "value"
+                                          ],
+                                          "additionalProperties": false
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "templateId"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "const": "URL"
+                                  },
+                                  "content": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "showPreview": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "text"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "content"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "readBy": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "at"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "deletedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "editedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "repliedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "forwardedId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "error": {
+                            "type": "string",
+                            "description": "A FAILED message's error, as the provider or the API gave it."
+                          },
+                          "chatId": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "sender",
+                          "timestamp",
+                          "status",
+                          "chatId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "hasMore": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "offset": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "reactions",
+                    "hasMore",
+                    "limit",
+                    "offset"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "6716d2a57e63cc0015b9f4d1",
+                      "chatId": "6713cc481f52bb0014a7d3e9",
+                      "type": "TEXT",
+                      "sender": {
+                        "type": "CONTACT",
+                        "id": "6712a4d95b38ee0011c9f2b4",
+                        "name": "Maria Andrade"
+                      },
+                      "timestamp": "2026-01-15T09:31:40.000Z",
+                      "status": "RECEIVED",
+                      "content": {
+                        "type": "TEXT",
+                        "content": {
+                          "text": "Oi! Vocês atendem no sábado?"
+                        }
+                      }
+                    }
+                  ],
+                  "reactions": [],
+                  "hasMore": false,
+                  "limit": 30,
+                  "offset": 0
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Answers with the messages of the contact's chats the caller can see, newest first, each carrying its `chatId`. Reads the 50 most recently updated chats, closed ones included, and test chats only with `[with]=tests`. Paginated by `limit`/`offset`, 30 per page by default, with `hasMore`; it does not count the total."
+      }
+    },
     "/v1/messages/{id}": {
       "get": {
         "tags": [
