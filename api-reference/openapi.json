@@ -2440,6 +2440,57 @@
         "description": "Sets the chat status to CLOSED. Answers 204 with no body."
       }
     },
+    "/v1/chats/{id}/unread": {
+      "patch": {
+        "tags": [
+          "Chats"
+        ],
+        "summary": "Mark a chat as unread",
+        "operationId": "patchChatsByIdUnread",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Sets the unread counter of the chat to 1 when it was 0; a chat that already has unread messages is left as it is. On UAZAPI and Z-API channels the phone shows the chat as unread too. Opening the chat reads it again. Answers 204 with no body."
+      }
+    },
     "/v1/chats/{id}/agent": {
       "patch": {
         "tags": [
