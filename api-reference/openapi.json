@@ -15560,7 +15560,8 @@
                     "properties": {
                       "phone": {
                         "type": "string",
-                        "minLength": 1
+                        "minLength": 1,
+                        "description": "The number with its country code, digits only or formatted (`5511999998888`)."
                       },
                       "channelId": {
                         "type": "string",
@@ -16001,7 +16002,8 @@
                     "properties": {
                       "phone": {
                         "type": "string",
-                        "minLength": 1
+                        "minLength": 1,
+                        "description": "The number with its country code, digits only or formatted (`5511999998888`)."
                       },
                       "channelId": {
                         "type": "string",
@@ -16034,7 +16036,8 @@
                     "properties": {
                       "phone": {
                         "type": "string",
-                        "minLength": 1
+                        "minLength": 1,
+                        "description": "The number with its country code, digits only or formatted (`5511999998888`)."
                       },
                       "channelId": {
                         "type": "string",
@@ -16093,7 +16096,8 @@
                     "properties": {
                       "phone": {
                         "type": "string",
-                        "minLength": 1
+                        "minLength": 1,
+                        "description": "The number with its country code, digits only or formatted (`5511999998888`)."
                       },
                       "channelId": {
                         "type": "string",
