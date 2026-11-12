@@ -3865,7 +3865,7 @@
             }
           }
         },
-        "description": "Creates the deal in the project of the API key and answers 201 with the created record.",
+        "description": "Creates the deal in the project of the API key and answers 201 with the created record. A person signed in to the dashboard who creates the deal straight into a stage that requires fields (`requiredFieldIds`) must send them, or the answer is 422 with `REQUIRED_FIELDS_MISSING`. An API key, an automation and the MCP are not held to it: a lead that arrives on its own always becomes a deal.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4255,7 +4255,7 @@
             }
           }
         },
-        "description": "Partial update: only the keys present in the body change. Answers 204 with no body.",
+        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. Moving the deal (`stageId`) checks the fields the stages require (`requiredFieldIds`): the destination, every open stage skipped when it moves forward, and every open stage when it is won (`CLOSED_WON`). Moving back or to `CLOSED_LOST` asks only for the destination. Fields sent in the same call count, and contact fields are read from the deal's contact. When something is missing the deal stays where it is and the answer is 422 with one `REQUIRED_FIELDS_MISSING` error per stage, each carrying `details.stageId` and `details.missingFieldIds`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -11184,7 +11184,7 @@
             }
           }
         },
-        "description": "The field is deleted. Answers 204 with no body."
+        "description": "The field is deleted. Answers 204 with no body. It is also taken out of every stage that required it (`requiredFieldIds`)."
       }
     },
     "/v1/leads": {
@@ -18283,6 +18283,9 @@
                             "type": "string",
                             "minLength": 1
                           },
+                          "description": {
+                            "type": "string"
+                          },
                           "projectId": {
                             "type": "string",
                             "minLength": 1
@@ -18482,6 +18485,16 @@
                                     "#4B5563"
                                   ]
                                 },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "requiredFieldIds": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
                                 "pipelineId": {
                                   "type": "string",
                                   "minLength": 1
@@ -18548,6 +18561,7 @@
                     {
                       "id": "670fa8b21d94cc0010e3c7a5",
                       "name": "Vendas",
+                      "description": "Vendas novas da equipe comercial.",
                       "projectId": "665f1c2e8a94b70012d4e9a1",
                       "sort": "CREATED_AT_DESC",
                       "createdAt": "2026-01-12T14:08:00.000Z",
@@ -18613,6 +18627,9 @@
                     "name": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "description": {
+                      "type": "string"
                     },
                     "projectId": {
                       "type": "string",
@@ -18813,6 +18830,16 @@
                               "#4B5563"
                             ]
                           },
+                          "description": {
+                            "type": "string"
+                          },
+                          "requiredFieldIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
                           "pipelineId": {
                             "type": "string",
                             "minLength": 1
@@ -18854,6 +18881,7 @@
                 "example": {
                   "id": "670fa8b21d94cc0010e3c7a5",
                   "name": "Vendas",
+                  "description": "Vendas novas da equipe comercial.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
                   "createdAt": "2026-01-12T14:08:00.000Z",
@@ -18894,6 +18922,11 @@
                   "name": {
                     "type": "string",
                     "minLength": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "A sentence or two on what kind of deal the pipeline is for, up to 200 characters. An empty string clears it."
                   },
                   "appearanceConfig": {
                     "type": "object",
@@ -19127,6 +19160,11 @@
                     "type": "string",
                     "minLength": 1
                   },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "A sentence or two on what kind of deal the pipeline is for, up to 200 characters. An empty string clears it."
+                  },
                   "sort": {
                     "type": "string",
                     "enum": [
@@ -19189,6 +19227,9 @@
                     "name": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "description": {
+                      "type": "string"
                     },
                     "projectId": {
                       "type": "string",
@@ -19389,6 +19430,16 @@
                               "#4B5563"
                             ]
                           },
+                          "description": {
+                            "type": "string"
+                          },
+                          "requiredFieldIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
                           "pipelineId": {
                             "type": "string",
                             "minLength": 1
@@ -19430,6 +19481,7 @@
                 "example": {
                   "id": "670fa8b21d94cc0010e3c7a5",
                   "name": "Vendas",
+                  "description": "Vendas novas da equipe comercial.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
                   "createdAt": "2026-01-12T14:08:00.000Z",
@@ -19576,6 +19628,16 @@
                           "#4B5563"
                         ]
                       },
+                      "description": {
+                        "type": "string"
+                      },
+                      "requiredFieldIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
                       "pipelineId": {
                         "type": "string",
                         "minLength": 1
@@ -19610,6 +19672,10 @@
                     "position": 0,
                     "type": "OPEN",
                     "color": "#2563EB",
+                    "description": "Lead com interesse confirmado e orçamento definido.",
+                    "requiredFieldIds": [
+                      "DEAL:PRICE"
+                    ],
                     "pipelineId": "670fa8b21d94cc0010e3c7a5",
                     "createdAt": "2026-01-12T14:08:00.000Z",
                     "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -19703,6 +19769,16 @@
                         "#4B5563"
                       ]
                     },
+                    "description": {
+                      "type": "string"
+                    },
+                    "requiredFieldIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
                     "pipelineId": {
                       "type": "string",
                       "minLength": 1
@@ -19735,6 +19811,10 @@
                   "position": 0,
                   "type": "OPEN",
                   "color": "#2563EB",
+                  "description": "Lead com interesse confirmado e orçamento definido.",
+                  "requiredFieldIds": [
+                    "DEAL:PRICE"
+                  ],
                   "pipelineId": "670fa8b21d94cc0010e3c7a5",
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -19773,7 +19853,7 @@
             }
           }
         },
-        "description": "Creates the stage in the project of the API key and answers 201 with the created record.",
+        "description": "Creates the stage in the project of the API key and answers 201 with the created record. `requiredFieldIds` lists the deal or contact fields a deal must have filled to enter the stage: fields of the project that a salesperson edits. Any other id answers 422 with `INVALID_REQUIRED_FIELDS`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -19810,6 +19890,19 @@
                       "#4B5563"
                     ],
                     "default": "#4B5563"
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "A sentence or two on what a deal being in the stage means, up to 200 characters. An empty string clears it."
+                  },
+                  "requiredFieldIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "description": "Deal or contact fields (ids from `get_fields`, ones a salesperson edits and not archived) that must have a value for a deal to enter the stage. Replaced whole."
                   }
                 },
                 "required": [
@@ -19894,6 +19987,16 @@
                         "#4B5563"
                       ]
                     },
+                    "description": {
+                      "type": "string"
+                    },
+                    "requiredFieldIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
                     "pipelineId": {
                       "type": "string",
                       "minLength": 1
@@ -19926,6 +20029,10 @@
                   "position": 0,
                   "type": "OPEN",
                   "color": "#2563EB",
+                  "description": "Lead com interesse confirmado e orçamento definido.",
+                  "requiredFieldIds": [
+                    "DEAL:PRICE"
+                  ],
                   "pipelineId": "670fa8b21d94cc0010e3c7a5",
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -20022,7 +20129,7 @@
             }
           }
         },
-        "description": "Partial update: only the keys present in the body change. Answers 204 with no body.",
+        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. `requiredFieldIds` is replaced whole, and an empty list clears it; an id that is not a deal or contact field a salesperson edits answers 422 with `INVALID_REQUIRED_FIELDS`. The shared won and lost stages (`CLOSED_WON`, `CLOSED_LOST`) answer 422 with `STAGE_LOCKED`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -20057,6 +20164,19 @@
                       "#DB2777",
                       "#4B5563"
                     ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "A sentence or two on what a deal being in the stage means, up to 200 characters. An empty string clears it."
+                  },
+                  "requiredFieldIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "description": "Deal or contact fields (ids from `get_fields`, ones a salesperson edits and not archived) that must have a value for a deal to enter the stage. Replaced whole."
                   }
                 },
                 "additionalProperties": false
