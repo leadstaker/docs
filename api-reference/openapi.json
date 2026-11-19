@@ -54,11 +54,11 @@
     },
     {
       "name": "Pipelines",
-      "description": "Ordered sets of stages a deal travels through."
+      "description": "Ordered sets of stages a deal travels through, each with its own won and lost stages."
     },
     {
       "name": "Stages",
-      "description": "Steps inside a pipeline, including the built-in open and closed ones."
+      "description": "Steps inside a pipeline: the open ones a deal moves through, and the pipeline's own won and lost stages."
     },
     {
       "name": "Tags",
@@ -3606,7 +3606,7 @@
             }
           }
         },
-        "description": "Answers with the paginated envelope: the matching deals in `data`, plus `hasMore`, `limit`, `offset` and `total`."
+        "description": "Answers with the paginated envelope: the matching deals in `data`, plus `hasMore`, `limit`, `offset` and `total`. A deal is won or lost by the `type` of the stage it sits in: to list the won ones, filter `stageId[in]` with the won stage ids of the pipelines from `GET /pipelines/{id}/stages`."
       },
       "post": {
         "tags": [
@@ -3865,7 +3865,7 @@
             }
           }
         },
-        "description": "Creates the deal in the project of the API key and answers 201 with the created record. A person signed in to the dashboard who creates the deal straight into a stage that requires fields (`requiredFieldIds`) must send them, or the answer is 422 with `REQUIRED_FIELDS_MISSING`. An API key, an automation and the MCP are not held to it: a lead that arrives on its own always becomes a deal.",
+        "description": "Creates the deal in the project of the API key and answers 201 with the created record. Without `stageId` the deal starts in the pipeline's first stage. A person signed in to the dashboard who creates the deal straight into a stage that requires fields (`requiredFieldIds`) must send them, or the answer is 422 with `REQUIRED_FIELDS_MISSING`. An API key, an automation and the MCP are not held to it: a lead that arrives on its own always becomes a deal. One created straight into a lost stage takes a `lossReasonId`. `stageId` takes a stage id from `GET /pipelines/{id}/stages`. `CLOSED_WON` and `CLOSED_LOST` are deprecated aliases of the pipeline's first won and lost stage, answered with `Deprecation` and `Sunset` headers until they stop working.",
         "requestBody": {
           "required": true,
           "content": {
@@ -3908,11 +3908,13 @@
                   },
                   "stageId": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "A stage id of the pipeline, from `get_stages`. CLOSED_WON and CLOSED_LOST are deprecated: they still lead to the pipeline's first won or lost stage, with a warning, until they stop working. Defaults to the pipeline's first stage."
                   },
                   "lossReasonId": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "Why the deal was lost, an id from `get_loss_reasons`. Only taken in a lost stage."
                   },
                   "tagIds": {
                     "type": "array",
@@ -4255,7 +4257,7 @@
             }
           }
         },
-        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. Moving the deal (`stageId`) checks the fields the stages require (`requiredFieldIds`): the destination, every open stage skipped when it moves forward, and every open stage when it is won (`CLOSED_WON`). Moving back or to `CLOSED_LOST` asks only for the destination. Fields sent in the same call count, and contact fields are read from the deal's contact. When something is missing the deal stays where it is and the answer is 422 with one `REQUIRED_FIELDS_MISSING` error per stage, each carrying `details.stageId` and `details.missingFieldIds`.",
+        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. A move a person signed in to the dashboard makes into a stage fails with 422 until the deal has what the stage asks for: a value in each of its `requiredFieldIds` (`REQUIRED_FIELDS_MISSING`, with `details.stageId` and `details.missingFieldIds`), and a `lossReasonId` sent in the same request when the stage is a lost one (`LOSS_REASON_REQUIRED`). Moving forward between open stages also asks for the fields of the stages skipped, and moving to a won stage for those of every open stage. Deal fields sent in the same `fields` count as filled; contact fields are read from the deal's contact. An API key, an automation and the MCP are not held to it. `stageId` takes a stage id from `GET /pipelines/{id}/stages`. `CLOSED_WON` and `CLOSED_LOST` are deprecated aliases of the pipeline's first won and lost stage, answered with `Deprecation` and `Sunset` headers until they stop working.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4310,7 +4312,8 @@
                   },
                   "stageId": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "A stage id of the pipeline, from `get_stages`. CLOSED_WON and CLOSED_LOST are deprecated: they still lead to the pipeline's first won or lost stage, with a warning, until they stop working."
                   },
                   "lossReasonId": {
                     "anyOf": [
@@ -4321,7 +4324,8 @@
                       {
                         "type": "null"
                       }
-                    ]
+                    ],
+                    "description": "Why the deal was lost, an id from `get_loss_reasons`. Only taken in a lost stage. Required to move a deal into a lost stage; null clears it."
                   }
                 },
                 "additionalProperties": false
@@ -18473,7 +18477,8 @@
                                   "type": "string",
                                   "enum": [
                                     "OPEN",
-                                    "CLOSED"
+                                    "CLOSED_WON",
+                                    "CLOSED_LOST"
                                   ]
                                 },
                                 "color": {
@@ -18498,6 +18503,28 @@
                                     "type": "string",
                                     "minLength": 1
                                   }
+                                },
+                                "probability": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "forecastCategory": {
+                                  "type": "string",
+                                  "enum": [
+                                    "PIPELINE",
+                                    "BEST_CASE",
+                                    "COMMIT",
+                                    "CLOSED",
+                                    "OMITTED"
+                                  ]
                                 },
                                 "pipelineId": {
                                   "type": "string",
@@ -18565,7 +18592,7 @@
                     {
                       "id": "670fa8b21d94cc0010e3c7a5",
                       "name": "Vendas",
-                      "description": "Vendas novas da equipe comercial.",
+                      "description": "Negócios novos de clientes que ainda não compraram.",
                       "projectId": "665f1c2e8a94b70012d4e9a1",
                       "sort": "CREATED_AT_DESC",
                       "createdAt": "2026-01-12T14:08:00.000Z",
@@ -18818,7 +18845,8 @@
                             "type": "string",
                             "enum": [
                               "OPEN",
-                              "CLOSED"
+                              "CLOSED_WON",
+                              "CLOSED_LOST"
                             ]
                           },
                           "color": {
@@ -18843,6 +18871,28 @@
                               "type": "string",
                               "minLength": 1
                             }
+                          },
+                          "probability": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "forecastCategory": {
+                            "type": "string",
+                            "enum": [
+                              "PIPELINE",
+                              "BEST_CASE",
+                              "COMMIT",
+                              "CLOSED",
+                              "OMITTED"
+                            ]
                           },
                           "pipelineId": {
                             "type": "string",
@@ -18885,7 +18935,7 @@
                 "example": {
                   "id": "670fa8b21d94cc0010e3c7a5",
                   "name": "Vendas",
-                  "description": "Vendas novas da equipe comercial.",
+                  "description": "Negócios novos de clientes que ainda não compraram.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
                   "createdAt": "2026-01-12T14:08:00.000Z",
@@ -18915,7 +18965,7 @@
             }
           }
         },
-        "description": "Creates the pipeline in the project of the API key and answers 201 with the created record.",
+        "description": "Creates the pipeline in the project of the API key and answers 201 with the created record. The pipeline comes with five open stages and its own won and lost stages, Ganho and Perdido, which `GET /pipelines/{id}/stages` lists.",
         "requestBody": {
           "required": true,
           "content": {
@@ -19418,7 +19468,8 @@
                             "type": "string",
                             "enum": [
                               "OPEN",
-                              "CLOSED"
+                              "CLOSED_WON",
+                              "CLOSED_LOST"
                             ]
                           },
                           "color": {
@@ -19443,6 +19494,28 @@
                               "type": "string",
                               "minLength": 1
                             }
+                          },
+                          "probability": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "forecastCategory": {
+                            "type": "string",
+                            "enum": [
+                              "PIPELINE",
+                              "BEST_CASE",
+                              "COMMIT",
+                              "CLOSED",
+                              "OMITTED"
+                            ]
                           },
                           "pipelineId": {
                             "type": "string",
@@ -19485,7 +19558,7 @@
                 "example": {
                   "id": "670fa8b21d94cc0010e3c7a5",
                   "name": "Vendas",
-                  "description": "Vendas novas da equipe comercial.",
+                  "description": "Negócios novos de clientes que ainda não compraram.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
                   "createdAt": "2026-01-12T14:08:00.000Z",
@@ -19616,7 +19689,8 @@
                         "type": "string",
                         "enum": [
                           "OPEN",
-                          "CLOSED"
+                          "CLOSED_WON",
+                          "CLOSED_LOST"
                         ]
                       },
                       "color": {
@@ -19641,6 +19715,28 @@
                           "type": "string",
                           "minLength": 1
                         }
+                      },
+                      "probability": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "forecastCategory": {
+                        "type": "string",
+                        "enum": [
+                          "PIPELINE",
+                          "BEST_CASE",
+                          "COMMIT",
+                          "CLOSED",
+                          "OMITTED"
+                        ]
                       },
                       "pipelineId": {
                         "type": "string",
@@ -19676,10 +19772,12 @@
                     "position": 0,
                     "type": "OPEN",
                     "color": "#2563EB",
-                    "description": "Lead com interesse confirmado e orçamento definido.",
+                    "description": "O lead respondeu e confirmou que tem a dor que resolvemos.",
                     "requiredFieldIds": [
-                      "DEAL:PRICE"
+                      "66eab3c47d21ff0011b2d6ea"
                     ],
+                    "probability": 20,
+                    "forecastCategory": "PIPELINE",
                     "pipelineId": "670fa8b21d94cc0010e3c7a5",
                     "createdAt": "2026-01-12T14:08:00.000Z",
                     "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -19709,7 +19807,7 @@
             }
           }
         },
-        "description": "Answers with a bare array of stages, without an envelope or pagination fields."
+        "description": "Answers with a bare array of stages, without an envelope or pagination fields. The stages come in board order: the open ones, then the won ones, then the lost ones. Every pipeline has its own won and lost stages, with ids of their own: a stage's `type` (`OPEN`, `CLOSED_WON`, `CLOSED_LOST`) is what tells a deal in it open, won or lost. The ids `CLOSED_WON` and `CLOSED_LOST` are deprecated aliases of the pipeline's first won and lost stage, answered with `Deprecation` and `Sunset` headers until they stop working."
       },
       "post": {
         "tags": [
@@ -19757,7 +19855,8 @@
                       "type": "string",
                       "enum": [
                         "OPEN",
-                        "CLOSED"
+                        "CLOSED_WON",
+                        "CLOSED_LOST"
                       ]
                     },
                     "color": {
@@ -19782,6 +19881,28 @@
                         "type": "string",
                         "minLength": 1
                       }
+                    },
+                    "probability": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "forecastCategory": {
+                      "type": "string",
+                      "enum": [
+                        "PIPELINE",
+                        "BEST_CASE",
+                        "COMMIT",
+                        "CLOSED",
+                        "OMITTED"
+                      ]
                     },
                     "pipelineId": {
                       "type": "string",
@@ -19815,10 +19936,12 @@
                   "position": 0,
                   "type": "OPEN",
                   "color": "#2563EB",
-                  "description": "Lead com interesse confirmado e orçamento definido.",
+                  "description": "O lead respondeu e confirmou que tem a dor que resolvemos.",
                   "requiredFieldIds": [
-                    "DEAL:PRICE"
+                    "66eab3c47d21ff0011b2d6ea"
                   ],
+                  "probability": 20,
+                  "forecastCategory": "PIPELINE",
                   "pipelineId": "670fa8b21d94cc0010e3c7a5",
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -19857,7 +19980,7 @@
             }
           }
         },
-        "description": "Creates the stage in the project of the API key and answers 201 with the created record. `requiredFieldIds` lists the deal or contact fields a deal must have filled to enter the stage: fields of the project that a salesperson edits. Any other id answers 422 with `INVALID_REQUIRED_FIELDS`.",
+        "description": "Creates the stage in the project of the API key and answers 201 with the created record. A won or lost stage gets its probability and forecast category fixed (100 and `CLOSED`, 0 and `OMITTED`) whatever is sent. `requiredFieldIds` takes deal or contact fields a salesperson edits, and makes a move a person signed in to the dashboard makes into the stage fail with `REQUIRED_FIELDS_MISSING` until they have a value (an API key, an automation and the MCP are not held to it). Answers 422 with `INVALID_REQUIRED_FIELDS` or `INVALID_FORECAST_CATEGORY` for a rule it cannot take.",
         "requestBody": {
           "required": true,
           "content": {
@@ -19871,14 +19994,18 @@
                   },
                   "position": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Where the stage sits among those of its type, smallest first: the open stages come first on the board, then the won ones, then the lost ones. Defaults to the end."
                   },
                   "type": {
                     "type": "string",
                     "enum": [
                       "OPEN",
+                      "CLOSED_WON",
+                      "CLOSED_LOST",
                       "CLOSED"
                     ],
+                    "description": "OPEN keeps a deal in progress; CLOSED_WON and CLOSED_LOST close it as won or lost, which is what reports count. CLOSED, the old name of a closed stage, is taken as CLOSED_LOST.",
                     "default": "OPEN"
                   },
                   "color": {
@@ -19907,6 +20034,30 @@
                       "minLength": 1
                     },
                     "description": "Deal or contact fields (ids from `get_fields`, ones a salesperson edits and not archived) that must have a value for a deal to enter the stage. Replaced whole."
+                  },
+                  "probability": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The chance, 0 to 100, that a deal here ends up won, which weights the forecast; null when unknown. Always 100 on a won stage and 0 on a lost one."
+                  },
+                  "forecastCategory": {
+                    "type": "string",
+                    "enum": [
+                      "PIPELINE",
+                      "BEST_CASE",
+                      "COMMIT",
+                      "CLOSED",
+                      "OMITTED"
+                    ],
+                    "description": "Where deals here count in the forecast: PIPELINE (still early), BEST_CASE (may come in), COMMIT (the team vouches for it) or OMITTED (left out). A won stage is always CLOSED and a lost one OMITTED."
                   }
                 },
                 "required": [
@@ -19917,6 +20068,97 @@
             }
           }
         }
+      }
+    },
+    "/v1/pipelines/{id}/stages/win-rates": {
+      "get": {
+        "tags": [
+          "Stages"
+        ],
+        "summary": "Get the real win rate of each stage",
+        "operationId": "getPipelinesByIdStagesWinRates",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "stageId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "winRate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Of the closed deals that went through the stage, the share won, from 0 to 1."
+                      },
+                      "closedDeals": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "How many closed deals the rate comes from."
+                      }
+                    },
+                    "required": [
+                      "stageId",
+                      "winRate",
+                      "closedDeals"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "example": [
+                  {
+                    "stageId": "670fa8b21d94cc0010e3c7a8",
+                    "winRate": 0.42,
+                    "closedDeals": 57
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "For each open stage of the pipeline, the share of won deals among the deals that went through it and are closed in the pipeline now, read from the stage history. It is the number to set as the stage's `probability`. A stage no closed deal went through is left out, so a new pipeline answers an empty array. Counts only the deals the caller can see."
       }
     },
     "/v1/pipelines/{id}/stages/{stageId}": {
@@ -19975,7 +20217,8 @@
                       "type": "string",
                       "enum": [
                         "OPEN",
-                        "CLOSED"
+                        "CLOSED_WON",
+                        "CLOSED_LOST"
                       ]
                     },
                     "color": {
@@ -20000,6 +20243,28 @@
                         "type": "string",
                         "minLength": 1
                       }
+                    },
+                    "probability": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "forecastCategory": {
+                      "type": "string",
+                      "enum": [
+                        "PIPELINE",
+                        "BEST_CASE",
+                        "COMMIT",
+                        "CLOSED",
+                        "OMITTED"
+                      ]
                     },
                     "pipelineId": {
                       "type": "string",
@@ -20033,10 +20298,12 @@
                   "position": 0,
                   "type": "OPEN",
                   "color": "#2563EB",
-                  "description": "Lead com interesse confirmado e orçamento definido.",
+                  "description": "O lead respondeu e confirmou que tem a dor que resolvemos.",
                   "requiredFieldIds": [
-                    "DEAL:PRICE"
+                    "66eab3c47d21ff0011b2d6ea"
                   ],
+                  "probability": 20,
+                  "forecastCategory": "PIPELINE",
                   "pipelineId": "670fa8b21d94cc0010e3c7a5",
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
@@ -20133,7 +20400,7 @@
             }
           }
         },
-        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. `requiredFieldIds` is replaced whole, and an empty list clears it; an id that is not a deal or contact field a salesperson edits answers 422 with `INVALID_REQUIRED_FIELDS`. The shared won and lost stages (`CLOSED_WON`, `CLOSED_LOST`) answer 422 with `STAGE_LOCKED`.",
+        "description": "Partial update: only the keys present in the body change. Answers 204 with no body. A rule change holds for the next moves into the stage: the deals already in it stay as they are. `type` changes only while the stage has no deals (422 `STAGE_HAS_DEALS`), and a pipeline always keeps one won and one lost stage (422 `LAST_CLOSED_STAGE`).",
         "requestBody": {
           "required": true,
           "content": {
@@ -20147,14 +20414,18 @@
                   },
                   "position": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Where the stage sits among those of its type, smallest first: the open stages come first on the board, then the won ones, then the lost ones."
                   },
                   "type": {
                     "type": "string",
                     "enum": [
                       "OPEN",
+                      "CLOSED_WON",
+                      "CLOSED_LOST",
                       "CLOSED"
-                    ]
+                    ],
+                    "description": "OPEN keeps a deal in progress; CLOSED_WON and CLOSED_LOST close it as won or lost, which is what reports count. CLOSED, the old name of a closed stage, is taken as CLOSED_LOST."
                   },
                   "color": {
                     "type": "string",
@@ -20181,6 +20452,30 @@
                       "minLength": 1
                     },
                     "description": "Deal or contact fields (ids from `get_fields`, ones a salesperson edits and not archived) that must have a value for a deal to enter the stage. Replaced whole."
+                  },
+                  "probability": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The chance, 0 to 100, that a deal here ends up won, which weights the forecast; null when unknown. Always 100 on a won stage and 0 on a lost one."
+                  },
+                  "forecastCategory": {
+                    "type": "string",
+                    "enum": [
+                      "PIPELINE",
+                      "BEST_CASE",
+                      "COMMIT",
+                      "CLOSED",
+                      "OMITTED"
+                    ],
+                    "description": "Where deals here count in the forecast: PIPELINE (still early), BEST_CASE (may come in), COMMIT (the team vouches for it) or OMITTED (left out). A won stage is always CLOSED and a lost one OMITTED."
                   }
                 },
                 "additionalProperties": false
@@ -20274,7 +20569,7 @@
             }
           }
         },
-        "description": "The stage is deleted. Answers 204 with no body. Pass `targetStageId` (an open stage of the same pipeline) to move every deal sitting on it there first; each moved deal is reported as updated. While another removal involving this stage or the target, as the stage removed or as its target, is still running, this one answers 429 with `LOCK_TIMEOUT`."
+        "description": "The stage is deleted. Answers 204 with no body. Pass `targetStageId` to move every deal sitting on it there first, each moved deal reported as updated: an open stage of the same pipeline for an open stage (422 `TARGET_STAGE_NOT_OPEN` otherwise), another stage of the same type for a won or lost one (422 `TARGET_STAGE_OF_OTHER_OUTCOME`). The pipeline's last won or last lost stage cannot be deleted (422 `LAST_CLOSED_STAGE`). While another removal involving this stage or the target, as the stage removed or as its target, is still running, this one answers 429 with `LOCK_TIMEOUT`."
       }
     },
     "/v1/tags": {
@@ -23251,6 +23546,10 @@
                 },
                 "message": {
                   "type": "string"
+                },
+                "details": {
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
