@@ -12704,6 +12704,21 @@
                               "OTHER"
                             ],
                             "description": "What a FAILED message's failure was about: TEMPLATE (the template was refused, paused or not approved), OUTSIDE_WINDOW (sent outside the 24 h window, where only a template goes), RECIPIENT (the number cannot receive it), CHANNEL (the channel cannot send: disconnected, blocked, unpaid) or OTHER."
+                          },
+                          "deliveredAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead's phone confirmed delivery, as the provider dated it."
+                          },
+                          "readAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead read it, as the provider dated it."
+                          },
+                          "playedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead played the audio (only Z-API reports it)."
                           }
                         },
                         "required": [
@@ -13995,6 +14010,21 @@
                             ],
                             "additionalProperties": false
                           },
+                          "deliveredAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead's phone confirmed delivery, as the provider dated it."
+                          },
+                          "readAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead read it, as the provider dated it."
+                          },
+                          "playedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead played the audio (only Z-API reports it)."
+                          },
                           "deletedAt": {
                             "type": "string",
                             "format": "date-time"
@@ -14591,6 +14621,21 @@
                               "at"
                             ],
                             "additionalProperties": false
+                          },
+                          "deliveredAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead's phone confirmed delivery, as the provider dated it."
+                          },
+                          "readAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead read it, as the provider dated it."
+                          },
+                          "playedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the lead played the audio (only Z-API reports it)."
                           },
                           "deletedAt": {
                             "type": "string",
@@ -15341,6 +15386,21 @@
                         "OTHER"
                       ],
                       "description": "What a FAILED message's failure was about: TEMPLATE (the template was refused, paused or not approved), OUTSIDE_WINDOW (sent outside the 24 h window, where only a template goes), RECIPIENT (the number cannot receive it), CHANNEL (the channel cannot send: disconnected, blocked, unpaid) or OTHER."
+                    },
+                    "deliveredAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the lead's phone confirmed delivery, as the provider dated it."
+                    },
+                    "readAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the lead read it, as the provider dated it."
+                    },
+                    "playedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the lead played the audio (only Z-API reports it)."
                     }
                   },
                   "required": [
@@ -15552,7 +15612,7 @@
             }
           }
         },
-        "description": "Starts or reuses a chat for the number and answers with its id and the ids the queued messages will be stored under; delivery is queued. `MESSAGES` sends a sequence in order, one message after the other: each item a text, or a typed message (text or media) as `MESSAGE` takes it, every type checked against the chat before anything is queued. A request repeated by the same caller with the same `Idempotency-Key` header and body answers from the first run instead of sending again; the key with a different body answers 422 `IDEMPOTENCY_KEY_REUSED`.",
+        "description": "Starts or reuses a chat for the number and answers with its id and the ids the queued messages will be stored under; delivery is queued. `MESSAGES` sends a sequence in order, one message after the other: each item a text, or a typed message (text or media) as `MESSAGE` takes it, every type checked against the chat before anything is queued. A `TEXT` may carry up to 3 reply buttons (`content.buttons: [{ text, id? }]`, a title of 20 characters at most, the id a tap answers with, its title by default) under a text of 1024 characters at most, or, naming `content.listButton` (the label of the button that opens the list, 20 characters at most), a list of up to 10 options (titles of 24 characters at most, ids of 200) under a text of 4096; only an official API (`WABA`) channel sends them, any other answers 422 `BUTTONS_REQUIRE_OFFICIAL_API` naming the message. An automation answering in an agent test chat names it as `chatId`, in place of `phone` and `channelId`: the messages go into that chat through its own channel (the test WhatsApp number sends them; a test of the platform, which has none, only shows them), and anyone else naming one answers 422 `TEST_CHAT_AUTOMATIONS_ONLY`. A request repeated by the same caller with the same `Idempotency-Key` header and body answers from the first run instead of sending again; the key with a different body answers 422 `IDEMPOTENCY_KEY_REUSED`.",
         "requestBody": {
           "required": true,
           "content": {
@@ -15570,6 +15630,11 @@
                       "channelId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Automations only, in place of `phone` and `channelId`: the agent test chat the run answers in. The messages go into it through its own channel: the test WhatsApp number sends them, and a test of the platform, which has none, only shows them."
                       },
                       "contactId": {
                         "type": "string",
@@ -15612,6 +15677,32 @@
                                         "selectedButton": {
                                           "type": "string",
                                           "minLength": 1
+                                        },
+                                        "buttons": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "object",
+                                            "properties": {
+                                              "text": {
+                                                "type": "string",
+                                                "minLength": 1
+                                              },
+                                              "id": {
+                                                "type": "string",
+                                                "minLength": 1
+                                              }
+                                            },
+                                            "required": [
+                                              "text"
+                                            ],
+                                            "additionalProperties": false
+                                          },
+                                          "minItems": 1
+                                        },
+                                        "listButton": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 20
                                         }
                                       },
                                       "required": [
@@ -15994,8 +16085,6 @@
                       }
                     },
                     "required": [
-                      "phone",
-                      "channelId",
                       "method",
                       "messages"
                     ],
@@ -16013,6 +16102,11 @@
                         "type": "string",
                         "minLength": 1
                       },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Automations only, in place of `phone` and `channelId`: the agent test chat the run answers in. The messages go into it through its own channel: the test WhatsApp number sends them, and a test of the platform, which has none, only shows them."
+                      },
                       "contactId": {
                         "type": "string",
                         "minLength": 1
@@ -16029,8 +16123,6 @@
                       }
                     },
                     "required": [
-                      "phone",
-                      "channelId",
                       "method"
                     ],
                     "additionalProperties": false
@@ -16046,6 +16138,11 @@
                       "channelId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Automations only, in place of `phone` and `channelId`: the agent test chat the run answers in. The messages go into it through its own channel: the test WhatsApp number sends them, and a test of the platform, which has none, only shows them."
                       },
                       "contactId": {
                         "type": "string",
@@ -16088,8 +16185,6 @@
                       }
                     },
                     "required": [
-                      "phone",
-                      "channelId",
                       "method",
                       "templateId"
                     ],
@@ -16106,6 +16201,11 @@
                       "channelId": {
                         "type": "string",
                         "minLength": 1
+                      },
+                      "chatId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Automations only, in place of `phone` and `channelId`: the agent test chat the run answers in. The messages go into it through its own channel: the test WhatsApp number sends them, and a test of the platform, which has none, only shows them."
                       },
                       "contactId": {
                         "type": "string",
@@ -16140,6 +16240,32 @@
                                   "selectedButton": {
                                     "type": "string",
                                     "minLength": 1
+                                  },
+                                  "buttons": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "text": {
+                                          "type": "string",
+                                          "minLength": 1
+                                        },
+                                        "id": {
+                                          "type": "string",
+                                          "minLength": 1
+                                        }
+                                      },
+                                      "required": [
+                                        "text"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    "minItems": 1
+                                  },
+                                  "listButton": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 20
                                   }
                                 },
                                 "required": [
@@ -16517,8 +16643,6 @@
                       }
                     },
                     "required": [
-                      "phone",
-                      "channelId",
                       "method",
                       "message"
                     ],
