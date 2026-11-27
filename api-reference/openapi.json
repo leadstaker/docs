@@ -18429,6 +18429,10 @@
                               "CREATED_AT_DESC"
                             ]
                           },
+                          "position": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
                           "appearanceConfig": {
                             "type": "object",
                             "properties": {
@@ -18684,7 +18688,8 @@
                           "updatedAt",
                           "name",
                           "projectId",
-                          "sort"
+                          "sort",
+                          "position"
                         ],
                         "additionalProperties": false
                       }
@@ -18719,6 +18724,7 @@
                       "description": "Negócios novos de clientes que ainda não compraram.",
                       "projectId": "665f1c2e8a94b70012d4e9a1",
                       "sort": "CREATED_AT_DESC",
+                      "position": 0,
                       "createdAt": "2026-01-12T14:08:00.000Z",
                       "updatedAt": "2026-01-15T09:32:00.000Z"
                     }
@@ -18796,6 +18802,10 @@
                         "CREATED_AT_ASC",
                         "CREATED_AT_DESC"
                       ]
+                    },
+                    "position": {
+                      "type": "integer",
+                      "minimum": 0
                     },
                     "appearanceConfig": {
                       "type": "object",
@@ -19052,7 +19062,8 @@
                     "updatedAt",
                     "name",
                     "projectId",
-                    "sort"
+                    "sort",
+                    "position"
                   ],
                   "additionalProperties": false
                 },
@@ -19062,6 +19073,7 @@
                   "description": "Negócios novos de clientes que ainda não compraram.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
+                  "position": 0,
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
                 }
@@ -19420,6 +19432,10 @@
                         "CREATED_AT_DESC"
                       ]
                     },
+                    "position": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
                     "appearanceConfig": {
                       "type": "object",
                       "properties": {
@@ -19675,7 +19691,8 @@
                     "updatedAt",
                     "name",
                     "projectId",
-                    "sort"
+                    "sort",
+                    "position"
                   ],
                   "additionalProperties": false
                 },
@@ -19685,6 +19702,7 @@
                   "description": "Negócios novos de clientes que ainda não compraram.",
                   "projectId": "665f1c2e8a94b70012d4e9a1",
                   "sort": "CREATED_AT_DESC",
+                  "position": 0,
                   "createdAt": "2026-01-12T14:08:00.000Z",
                   "updatedAt": "2026-01-15T09:32:00.000Z"
                 }
